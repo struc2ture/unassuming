@@ -6,6 +6,7 @@ from typing import Iterator, Tuple, List
 import tcod
 
 from entity import Entity
+import entity_specs
 from game_map import GameMap
 import tile_types
 
@@ -38,6 +39,31 @@ class RectangularRoom:
         )
 
 
+class MapSpec:
+    max_rooms: int
+    room_min_size: int
+    room_max_size: int
+    map_width: int
+    map_height: int
+    max_monsters_per_room: int
+
+    def __init__(
+        self,
+        max_rooms: int,
+        room_min_size: int,
+        room_max_size: int,
+        map_width: int,
+        map_height: int,
+        max_monsters_per_room: int
+    ):
+        self.max_rooms = max_rooms
+        self.room_min_size = room_min_size
+        self.room_max_size = room_max_size
+        self.map_width = map_width
+        self.map_height = map_height
+        self.max_monsters_per_room = max_monsters_per_room
+
+
 def tunnel_between(
     start: Tuple[int, int], end: Tuple[int, int]
 ) -> Iterator[Tuple[int, int]]:
@@ -58,21 +84,36 @@ def tunnel_between(
         yield x, y
 
 
+def place_room_entities(
+    room: RectangularRoom,
+    entities: List[Entity],
+    max_monsters: int
+) -> None:
+    monster_count = random.randint(0, max_monsters)
+
+    for i in range(monster_count):
+        x = random.randint(room.x1 + 1, room.x2 - 1)
+        y = random.randint(room.y1 + 1, room.y2 - 1)
+
+        if not any(entity.x == x and entity.y == y for entity in entities):
+            if random.random() < 0.8:
+                entities.append(Entity(entity_specs.crane, x, y))
+            else:
+                entities.append(Entity(entity_specs.bulb, x, y))
+
+
 def generate_map( 
-    max_rooms: int,
-    room_min_size: int,
-    room_max_size: int,
-    map_width: int,
-    map_height: int,
+    spec: MapSpec,
     player: Entity,
+    entities: List[Entity]
 ) -> GameMap:
-    map = GameMap(map_width, map_height)
+    map = GameMap(spec.map_width, spec.map_height)
 
     rooms: List[RectangularRoom] = []
 
-    for r in range(max_rooms):
-        room_w = random.randint(room_min_size, room_max_size)
-        room_h = random.randint(room_min_size, room_max_size)
+    for r in range(spec.max_rooms):
+        room_w = random.randint(spec.room_min_size, spec.room_max_size)
+        room_h = random.randint(spec.room_min_size, spec.room_max_size)
 
         x = random.randint(0, map.cols - room_w - 1)
         y = random.randint(0, map.rows - room_h - 1)
@@ -89,6 +130,8 @@ def generate_map(
         else:
             for x, y in tunnel_between(rooms[-1].center, new_room.center):
                 map.tiles[x, y] = tile_types.floor
+
+        place_room_entities(new_room, entities, spec.max_monsters_per_room)
 
         rooms.append(new_room)
 

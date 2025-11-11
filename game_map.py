@@ -28,6 +28,9 @@ class GameMap:
             self.tiles["walkable"][x, y] == 1
         )
 
+    def pos_visible(self, x, y) -> bool:
+        return self.visible[x, y] == 1
+
     def draw(self, console: tcod.console.Console):
         console.rgb[0:self.cols, 0:self.rows] = np.select(
             condlist=[self.visible, self.explored],

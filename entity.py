@@ -1,20 +1,32 @@
+from typing import Tuple
+
 import tcod
 
 from game_map import GameMap
+from entity_specs import EntitySpec
 
 class Entity:
+    spec: EntitySpec
     x: int
     y: int
-    glyph: str
-    name: str
 
-    def __init__(self, glyph: str, name: str):
-        self.glyph = glyph
-        self.name = name
+    def __init__(self, spec: EntitySpec, x: int, y: int):
+        self.spec = spec
+        self.x = x
+        self.y = y
 
-    def set_pos(self, x: int, y: int) -> None:
+    @property
+    def pos(self):
+        return self.x, self.y
+
+    def set_pos(self, x: int, y: int):
         self.x = x
         self.y = y
 
     def draw(self, console: tcod.console.Console) -> None:
-        console.print(self.x, self.y, self.glyph)
+        console.print(
+            x=self.x,
+            y=self.y,
+            text=self.spec.glyph,
+            fg=self.spec.color
+        )
