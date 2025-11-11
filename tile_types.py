@@ -32,6 +32,10 @@ def new_tile(
     return np.array((walkable, transparent, dark, light), dtype=tile_dt)
 
 
+# Don't worry about it
+SHROUD = np.array((ord(" "), (255, 255, 255), (0, 0, 0)), dtype=graphic_dt)
+
+
 floor = new_tile(
     walkable=True,
     transparent=True,

@@ -1,5 +1,7 @@
 import tcod
 
+from game_map import GameMap
+
 class Entity:
     x: int
     y: int
@@ -7,10 +9,12 @@ class Entity:
     name: str
 
     def __init__(self, glyph: str, name: str):
-        self.x = 0
-        self.y = 0
         self.glyph = glyph
         self.name = name
 
-    def draw(self, console: tcod.console.Console):
+    def set_pos(self, x: int, y: int) -> None:
+        self.x = x
+        self.y = y
+
+    def draw(self, console: tcod.console.Console) -> None:
         console.print(self.x, self.y, self.glyph)

@@ -85,7 +85,7 @@ def generate_map(
         map.tiles[new_room.inner] = tile_types.floor
 
         if len(rooms) == 0:
-            player.x, player.y = new_room.center
+            player.set_pos(*new_room.center)
         else:
             for x, y in tunnel_between(rooms[-1].center, new_room.center):
                 map.tiles[x, y] = tile_types.floor

@@ -1,5 +1,6 @@
-import numpy as np
+from typing import List
 
+import numpy as np
 import tcod
 
 import tile_types
@@ -12,6 +13,8 @@ class GameMap:
         self.cols = cols
         self.rows = rows
         self.tiles = np.full((cols, rows), fill_value=tile_types.wall, order="F")
+        self.visible = np.full((cols, rows), fill_value=False, order="F")
+        self.explored = np.full((cols, rows), fill_value=False, order="F")
 
     def pos_in_bounds(self, x, y) -> bool:
         return (
@@ -26,4 +29,8 @@ class GameMap:
         )
 
     def draw(self, console: tcod.console.Console):
-        console.rgb[0:self.cols, 0:self.rows] = self.tiles["dark"]
+        console.rgb[0:self.cols, 0:self.rows] = np.select(
+            condlist=[self.visible, self.explored],
+            choicelist=[self.tiles["light"], self.tiles["dark"]],
+            default=tile_types.SHROUD
+        )

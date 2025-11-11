@@ -18,6 +18,7 @@ class Game:
             map_height=map_height,
             player=self.player
         )
+        self.update_fov()
 
     def handle_event(self, event: tcod.event.Event) -> None:
         player_dx = 0
@@ -37,15 +38,23 @@ class Game:
             case tcod.event.KeyDown(sym=tcod.event.KeySym.S):
                 player_dy = +1
 
-        self.move_player(player_dx, player_dy)
-
-    def move_player(self, dx, dy) -> None:
-        new_x = self.player.x + dx
-        new_y = self.player.y + dy
-        if self.game_map.pos_walkable(new_x, new_y):
-            self.player.x = new_x
-            self.player.y = new_y
+        self.move_entity(self.player, player_dx, player_dy)
 
     def draw(self, console: tcod.console.Console) -> None:
         self.game_map.draw(console)
         self.player.draw(console)
+
+    def move_entity(self, entity: Entity, dx: int, dy: int) -> None:
+        new_x = entity.x + dx
+        new_y = entity.y + dy
+        if self.game_map.pos_walkable(new_x, new_y):
+            entity.set_pos(new_x, new_y)
+        self.update_fov()
+
+    def update_fov(self) -> None:
+        self.game_map.visible[:] = tcod.map.compute_fov(
+            self.game_map.tiles["transparent"],
+            (self.player.x, self.player.y),
+            radius=8
+        )
+        self.game_map.explored |= self.game_map.visible
