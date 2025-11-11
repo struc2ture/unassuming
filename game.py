@@ -3,6 +3,7 @@ from typing import List, Optional
 import tcod
 
 from entity import Entity
+from entity_controller import EntityController
 import entity_specs
 from game_map import GameMap
 import proc_gen
@@ -11,6 +12,7 @@ class Game:
     player: Entity
     game_map: GameMap
     entities: List[Entity]
+    entity_controller: EntityController
 
     def __init__(self, map_width: int, map_height: int):
         self.player = Entity(entity_specs.player, 0, 0)
@@ -29,6 +31,9 @@ class Game:
             player=self.player,
             entities=self.entities
         )
+
+        self.entity_controller = EntityController(game_map=self.game_map, entities=self.entities)
+
         self.update_fov()
 
     def handle_event(self, event: tcod.event.Event) -> None:
@@ -49,30 +54,14 @@ class Game:
             case tcod.event.KeyDown(sym=tcod.event.KeySym.S):
                 player_dy = +1
 
-        self.move_entity(self.player, player_dx, player_dy)
+        self.entity_controller.move_or_bump(self.player, player_dx, player_dy)
+        self.update_fov()
 
     def draw(self, console: tcod.console.Console) -> None:
         self.game_map.draw(console)
         for entity in self.entities:
             if self.game_map.pos_visible(*entity.pos):
                 entity.draw(console)
-
-    def get_entity_at(self, x: int, y: int) -> Optional[Entity]:
-        for entity in self.entities:
-            if entity.x == x and entity.y == y:
-                return entity
-        
-        return None
-
-    def move_entity(self, entity: Entity, dx: int, dy: int) -> None:
-        new_x = entity.x + dx
-        new_y = entity.y + dy
-        if (
-            self.game_map.pos_walkable(new_x, new_y) and
-            self.get_entity_at(new_x, new_y) is None
-        ):
-            entity.set_pos(new_x, new_y)
-        self.update_fov()
 
     def update_fov(self) -> None:
         self.game_map.visible[:] = tcod.map.compute_fov(

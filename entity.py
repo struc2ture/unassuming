@@ -2,7 +2,6 @@ from typing import Tuple
 
 import tcod
 
-from game_map import GameMap
 from entity_specs import EntitySpec
 
 class Entity:
@@ -16,7 +15,7 @@ class Entity:
         self.y = y
 
     @property
-    def pos(self):
+    def pos(self) -> Tuple[int, int]:
         return self.x, self.y
 
     def set_pos(self, x: int, y: int):
