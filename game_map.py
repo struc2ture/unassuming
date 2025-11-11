@@ -11,7 +11,7 @@ class GameMap:
     def __init__(self, cols, rows):
         self.cols = cols
         self.rows = rows
-        self.tiles = np.full((cols, rows), fill_value=tile_types.floor, order="F")
+        self.tiles = np.full((cols, rows), fill_value=tile_types.wall, order="F")
 
     def pos_in_bounds(self, x, y) -> bool:
         return (

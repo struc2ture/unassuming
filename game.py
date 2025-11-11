@@ -1,16 +1,23 @@
 import tcod
 
+from entity import Entity
 from game_map import GameMap
+import proc_gen
 
 class Game:
-    player_x: int
-    player_y: int
+    player: Entity
     game_map: GameMap
 
-    def __init__(self, map_width, map_height):
-        self.game_map = GameMap(map_width, map_height)
-        self.player_x = self.game_map.cols // 2
-        self.player_y = self.game_map.rows // 2 
+    def __init__(self, map_width: int, map_height: int):
+        self.player = Entity("@", "Player")
+        self.game_map = proc_gen.generate_map(
+            max_rooms=30,
+            room_min_size=6,
+            room_max_size=10,
+            map_width=map_width,
+            map_height=map_height,
+            player=self.player
+        )
 
     def handle_event(self, event: tcod.event.Event) -> None:
         player_dx = 0
@@ -33,12 +40,12 @@ class Game:
         self.move_player(player_dx, player_dy)
 
     def move_player(self, dx, dy) -> None:
-        new_x = self.player_x + dx
-        new_y = self.player_y + dy
+        new_x = self.player.x + dx
+        new_y = self.player.y + dy
         if self.game_map.pos_walkable(new_x, new_y):
-            self.player_x = new_x
-            self.player_y = new_y
+            self.player.x = new_x
+            self.player.y = new_y
 
     def draw(self, console: tcod.console.Console) -> None:
         self.game_map.draw(console)
-        console.print(self.player_x, self.player_y, "@")
+        self.player.draw(console)
