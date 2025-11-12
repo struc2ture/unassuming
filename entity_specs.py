@@ -31,6 +31,6 @@ class EntitySpec:
         self.defense = defense
 
 
-player = EntitySpec("@", (255, 255, 255), "Player", "Player Description", False, 10, 1, 1)
+player = EntitySpec("@", (255, 255, 255), "Player", "Player Description", False, 10, 2, 1)
 crane = EntitySpec("c", (160, 30, 140), "Crane", "Crane Description", True, 3, 1, 1)
 bulb = EntitySpec("b", (30, 100, 30), "Bulb", "Bulb Description", True, 15, 3, 3)

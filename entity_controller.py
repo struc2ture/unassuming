@@ -20,7 +20,14 @@ class EntityController:
         for entity in self.entities:
             if entity.x == x and entity.y == y:
                 return entity
-        
+
+        return None
+
+    def get_blocking_entity_at(self, x: int, y: int) -> Optional[Entity]:
+        for entity in self.entities:
+            if entity.x == x and entity.y == y and entity.is_blocking:
+                return entity
+
         return None
 
     def move(self, entity: Entity, dx: int, dy: int) -> None:
@@ -28,17 +35,19 @@ class EntityController:
         new_y = entity.y + dy
         if (
             self.game_map.pos_walkable(new_x, new_y) and
-            self.get_entity_at(new_x, new_y) is None
+            self.get_blocking_entity_at(new_x, new_y) is None
         ):
             entity.set_pos(new_x, new_y)
 
     def bump(self, entity: Entity, bumped_entity: Entity) -> None:
-        damage = min(bumped_entity.spec.defense - entity.spec.attack, bumped_entity.health)
+        damage = min(max(entity.spec.attack - bumped_entity.spec.defense, 0), bumped_entity.health)
         bumped_entity.health -= damage
 
         print(f'{entity.spec.name} bumps against {bumped_entity.spec.name}, dealing {damage} damage')
         if bumped_entity.health <= 0:
             print(f'{bumped_entity.spec.name} is dead.')
+            bumped_entity.is_remains = True
+            bumped_entity.is_alive = False
 
     def skip_turn(self, entity: Entity) -> None:
         pass
@@ -47,14 +56,14 @@ class EntityController:
         new_x = entity.x + dx
         new_y = entity.y + dy
         if self.game_map.pos_walkable(new_x, new_y):
-            bumped_entity = self.get_entity_at(new_x, new_y)
+            bumped_entity = self.get_blocking_entity_at(new_x, new_y)
             if bumped_entity and bumped_entity is not entity:
                 self.bump(entity, bumped_entity)
             else:
                 entity.set_pos(new_x, new_y)
 
     def teleport_or_bump(self, entity: Entity, x: int, y: int) -> None:
-        bumped_entity = self.get_entity_at(x, y)
+        bumped_entity = self.get_blocking_entity_at(x, y)
         if bumped_entity and bumped_entity is not entity:
                 self.bump(entity, bumped_entity)
         else:
@@ -105,5 +114,5 @@ class EntityController:
 
     def process_entities_turns(self):
         for entity in self.entities:
-            if entity.spec.is_thinking:
+            if entity.spec.is_thinking and entity.is_alive:
                 self.think_and_act_for(entity)
