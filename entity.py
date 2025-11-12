@@ -8,11 +8,13 @@ class Entity:
     spec: EntitySpec
     x: int
     y: int
+    health: int
 
     def __init__(self, spec: EntitySpec, x: int, y: int):
         self.spec = spec
         self.x = x
         self.y = y
+        self.health = self.spec.max_health
 
     @property
     def pos(self) -> Tuple[int, int]:

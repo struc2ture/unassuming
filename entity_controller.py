@@ -32,20 +32,31 @@ class EntityController:
         ):
             entity.set_pos(new_x, new_y)
 
+    def bump(self, entity: Entity, bumped_entity: Entity) -> None:
+        damage = min(bumped_entity.spec.defense - entity.spec.attack, bumped_entity.health)
+        bumped_entity.health -= damage
+
+        print(f'{entity.spec.name} bumps against {bumped_entity.spec.name}, dealing {damage} damage')
+        if bumped_entity.health <= 0:
+            print(f'{bumped_entity.spec.name} is dead.')
+
+    def skip_turn(self, entity: Entity) -> None:
+        pass
+
     def move_or_bump(self, entity: Entity, dx: int, dy: int) -> None:
         new_x = entity.x + dx
         new_y = entity.y + dy
         if self.game_map.pos_walkable(new_x, new_y):
             bumped_entity = self.get_entity_at(new_x, new_y)
             if bumped_entity and bumped_entity is not entity:
-                print(f'{entity.spec.name} bumps against {bumped_entity.spec.name}')
+                self.bump(entity, bumped_entity)
             else:
                 entity.set_pos(new_x, new_y)
 
     def teleport_or_bump(self, entity: Entity, x: int, y: int) -> None:
         bumped_entity = self.get_entity_at(x, y)
         if bumped_entity and bumped_entity is not entity:
-            print(f'{entity.spec.name} bumps against {bumped_entity.spec.name}')
+                self.bump(entity, bumped_entity)
         else:
             entity.set_pos(x, y)
 
@@ -85,7 +96,8 @@ class EntityController:
 
     def think_and_act_for(self, entity: Entity):
         target_entity = self.player
-        if self.game_map.visible[target_entity.x, target_entity.y]:
+        # NOTE(A): This is if PLAYER sees the acting entity (for now)
+        if self.game_map.visible[entity.x, entity.y]:
             path = self.get_path_to(entity, *target_entity.pos)
             if path:
                 next_step = path.pop(0)

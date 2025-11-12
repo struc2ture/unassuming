@@ -39,24 +39,47 @@ class Game:
     def handle_event(self, event: tcod.event.Event) -> None:
         player_dx = 0
         player_dy = 0
+        player_passed_turn = False
         match event:
             case tcod.event.Quit():
                 raise SystemExit
             case tcod.event.KeyDown(sym=tcod.event.KeySym.ESCAPE):
                 raise SystemExit
 
-            case tcod.event.KeyDown(sym=tcod.event.KeySym.A):
+            case tcod.event.KeyDown(sym=tcod.event.KeySym.Q):
                 player_dx = -1
+                player_dy = -1
+            case tcod.event.KeyDown(sym=tcod.event.KeySym.W):
+                player_dx =  0
+                player_dy = -1
+            case tcod.event.KeyDown(sym=tcod.event.KeySym.E):
+                player_dx = +1
+                player_dy = -1
             case tcod.event.KeyDown(sym=tcod.event.KeySym.D):
                 player_dx = +1
-            case tcod.event.KeyDown(sym=tcod.event.KeySym.W):
-                player_dy = -1
-            case tcod.event.KeyDown(sym=tcod.event.KeySym.S):
+                player_dy =  0
+            case tcod.event.KeyDown(sym=tcod.event.KeySym.C):
+                player_dx = +1
                 player_dy = +1
+            case tcod.event.KeyDown(sym=tcod.event.KeySym.X):
+                player_dx =  0
+                player_dy = +1
+            case tcod.event.KeyDown(sym=tcod.event.KeySym.Z):
+                player_dx = -1
+                player_dy = +1
+            case tcod.event.KeyDown(sym=tcod.event.KeySym.A):
+                player_dx = -1
+                player_dy =  0
+            case tcod.event.KeyDown(sym=tcod.event.KeySym.S):
+                self.entity_controller.skip_turn(self.player)
+                player_passed_turn = True
 
         if player_dx != 0 or player_dy != 0:
             self.entity_controller.move_or_bump(self.player, player_dx, player_dy)
             self.update_fov()
+            player_passed_turn = True
+
+        if player_passed_turn:
             self.entity_controller.process_entities_turns()
 
     def draw(self, console: tcod.console.Console) -> None:
