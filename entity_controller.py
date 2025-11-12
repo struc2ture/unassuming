@@ -46,12 +46,11 @@ class EntityController:
         print(f'{entity.spec.name} bumps against {bumped_entity.spec.name}, dealing {damage} damage')
         if bumped_entity.health <= 0:
             print(f'{bumped_entity.spec.name} is dead.')
-            bumped_entity.is_remains = True
-            bumped_entity.is_alive = False
+            bumped_entity.set_dead()
 
     def skip_turn(self, entity: Entity) -> None:
         pass
-
+ 
     def move_or_bump(self, entity: Entity, dx: int, dy: int) -> None:
         new_x = entity.x + dx
         new_y = entity.y + dy

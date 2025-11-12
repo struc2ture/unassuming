@@ -102,7 +102,7 @@ def place_room_entities(
                 entities.append(Entity(entity_specs.bulb, x, y))
 
 
-def generate_map( 
+def generate_map(
     spec: MapSpec,
     player: Entity,
     entities: List[Entity]

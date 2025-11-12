@@ -87,7 +87,10 @@ class Game:
 
     def draw(self, console: tcod.console.Console) -> None:
         self.game_map.draw(console)
-        for entity in self.entities:
+        sorted_entities = sorted(
+            self.entities, key=lambda x: x.render_layer.value
+        )
+        for entity in sorted_entities:
             if self.game_map.pos_visible(*entity.pos):
                 entity.draw(console)
 
