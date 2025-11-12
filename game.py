@@ -32,7 +32,7 @@ class Game:
             entities=self.entities
         )
 
-        self.entity_controller = EntityController(game_map=self.game_map, entities=self.entities)
+        self.entity_controller = EntityController(game_map=self.game_map, entities=self.entities, player=self.player)
 
         self.update_fov()
 
@@ -54,8 +54,10 @@ class Game:
             case tcod.event.KeyDown(sym=tcod.event.KeySym.S):
                 player_dy = +1
 
-        self.entity_controller.move_or_bump(self.player, player_dx, player_dy)
-        self.update_fov()
+        if player_dx != 0 or player_dy != 0:
+            self.entity_controller.move_or_bump(self.player, player_dx, player_dy)
+            self.update_fov()
+            self.entity_controller.process_entities_turns()
 
     def draw(self, console: tcod.console.Console) -> None:
         self.game_map.draw(console)

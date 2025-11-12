@@ -14,7 +14,7 @@ def main() -> None:
 
     game = Game(80, 50)
 
-    with tcod.context.new(console=console, tileset=tileset) as context:
+    with tcod.context.new(console=console, tileset=tileset, title="Unassuming") as context:
         while True:  # Main loop
             for event in tcod.event.wait():  # Event loop, blocks until pending events exist
                 game.handle_event(event)
