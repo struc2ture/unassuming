@@ -11,8 +11,8 @@ class TraceEntry:
 
     def __str__(self) -> str:
         item_sep = "\n  "
-        item_str = f"\nitems:\n  {item_sep.join(self.items)}" if len(self.items) > 0 else ""
-        return f'kind: {self.kind}{item_str}'
+        item_str = f"\n  {item_sep.join(self.items)}" if len(self.items) > 0 else ""
+        return f'{self.kind}{item_str}'
 
 
 @dataclass

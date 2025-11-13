@@ -21,6 +21,7 @@ class Game:
         self.game_turn = 0
 
         GameTrace.add_game_start()
+        GameTrace.add_tick(self.game_turn)
 
         self.player = templates.PLAYER.spawn(0, 0)
         self.entities = [self.player]
@@ -43,7 +44,8 @@ class Game:
 
         self.update_fov()
 
-    def handle_event(self, event: tcod.event.Event) -> None:
+    def handle_event(self, context: tcod.context.Context, event: tcod.event.Event) -> None:
+        context.convert_event(event)  # Adds tile coordinates to mouse events.
         match event:
             case tcod.event.Quit():
                 raise SystemExit
@@ -56,7 +58,13 @@ class Game:
                     print()
                     GameTrace.log.print_last(5)
                     print()
-
+            case tcod.event.MouseButtonDown(button=tcod.event.MouseButton.LEFT, tile=tile):
+                entity = self.entity_controller.get_entity_at(int(tile.x), int(tile.y))
+                if entity:
+                    print("\nCLICKED ENTITY:")
+                    print(entity.name)
+                    print(entity.description)
+                    print()
         
         player_dx = 0
         player_dy = 0
