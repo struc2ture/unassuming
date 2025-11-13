@@ -4,7 +4,7 @@ import numpy as np
 import tcod
 
 from game_map import GameMap
-from entity import Entity
+from entity import Actor, Entity
 
 class EntityController:
     game_map: GameMap
@@ -20,14 +20,13 @@ class EntityController:
         for entity in self.entities:
             if entity.x == x and entity.y == y:
                 return entity
-
         return None
 
     def get_blocking_entity_at(self, x: int, y: int) -> Optional[Entity]:
         for entity in self.entities:
-            if entity.x == x and entity.y == y and entity.is_blocking:
-                return entity
-
+            if entity.x == x and entity.y == y:
+                if entity.is_blocking:
+                    return entity
         return None
 
     def move(self, entity: Entity, dx: int, dy: int) -> None:
@@ -39,14 +38,20 @@ class EntityController:
         ):
             entity.set_pos(new_x, new_y)
 
-    def bump(self, entity: Entity, bumped_entity: Entity) -> None:
-        damage = min(max(entity.spec.attack - bumped_entity.spec.defense, 0), bumped_entity.health)
-        bumped_entity.health -= damage
+    def attack(self, attacker: Actor, defender: Actor) -> None:
+        damage = min(max(attacker.stats.attack - defender.stats.defense, 0), defender.stats.hp)
+        defender.stats.hp -= damage
+        if defender.stats.hp <= 0:
+            defender.die()
 
-        print(f'{entity.spec.name} bumps against {bumped_entity.spec.name}, dealing {damage} damage')
-        if bumped_entity.health <= 0:
-            print(f'{bumped_entity.spec.name} is dead.')
-            bumped_entity.set_dead()
+        log_line = f'{attacker.name} swings at {defender.name}, '
+        log_line += f'and deals {damage} damage' if damage > 0 else 'but misses'
+        log_line += '.' if defender.is_alive else ', killing them.'
+        print(log_line)
+
+    def bump(self, entity: Entity, bumped_entity: Entity) -> None:
+        if isinstance(entity, Actor) and isinstance(bumped_entity, Actor):
+            self.attack(entity, bumped_entity)
 
     def skip_turn(self, entity: Entity) -> None:
         pass
@@ -102,7 +107,7 @@ class EntityController:
         # Convert from List[List[int]] to List[Tuple[int, int]]
         return [(index[0], index[1]) for index in path]
 
-    def think_and_act_for(self, entity: Entity):
+    def process_entity_turn(self, entity: Entity):
         target_entity = self.player
         # NOTE(A): This is if PLAYER sees the acting entity (for now)
         if self.game_map.visible[entity.x, entity.y]:
@@ -111,7 +116,8 @@ class EntityController:
                 next_step = path.pop(0)
                 self.teleport_or_bump(entity, *next_step)
 
-    def process_entities_turns(self):
+    def process_entity_turns(self):
         for entity in self.entities:
-            if entity.spec.is_thinking and entity.is_alive:
-                self.think_and_act_for(entity)
+            # print(f'Processing entity {entity.name}. Actor: {isinstance(entity, Actor)}. Alive: {isinstance(entity, Actor) and entity.is_alive}')
+            if isinstance(entity, Actor) and entity is not self.player and entity.is_alive:
+                self.process_entity_turn(entity)

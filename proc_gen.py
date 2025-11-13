@@ -6,7 +6,7 @@ from typing import Iterator, Tuple, List
 import tcod
 
 from entity import Entity
-import entity_specs
+import templates
 from game_map import GameMap
 import tile_types
 
@@ -97,9 +97,9 @@ def place_room_entities(
 
         if not any(entity.x == x and entity.y == y for entity in entities):
             if random.random() < 0.8:
-                entities.append(Entity(entity_specs.crane, x, y))
+                entities.append(templates.CRANE.spawn(x, y))
             else:
-                entities.append(Entity(entity_specs.bulb, x, y))
+                entities.append(templates.BULB.spawn(x, y))
 
 
 def generate_map(

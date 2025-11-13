@@ -2,20 +2,20 @@ from typing import List, Optional
 
 import tcod
 
-from entity import Entity
+from entity import Actor, Entity
 from entity_controller import EntityController
-import entity_specs
+import templates
 from game_map import GameMap
 import proc_gen
 
 class Game:
-    player: Entity
+    player: Actor
     game_map: GameMap
     entities: List[Entity]
     entity_controller: EntityController
 
     def __init__(self, map_width: int, map_height: int):
-        self.player = Entity(entity_specs.player, 0, 0)
+        self.player = templates.PLAYER.spawn(0, 0)
         self.entities = [self.player]
 
         map_spec = proc_gen.MapSpec(
@@ -83,7 +83,7 @@ class Game:
                 player_passed_turn = True
 
             if player_passed_turn:
-                self.entity_controller.process_entities_turns()
+                self.entity_controller.process_entity_turns()
 
     def draw(self, console: tcod.console.Console) -> None:
         self.game_map.draw(console)
