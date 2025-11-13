@@ -1,3 +1,5 @@
+import datetime
+import os
 from typing import List, Optional
 
 import tcod
@@ -6,6 +8,7 @@ from entity import Actor, Entity
 from entity_controller import EntityController
 import templates
 from game_map import GameMap
+from game_trace import GameTrace
 import proc_gen
 
 class Game:
@@ -15,6 +18,10 @@ class Game:
     entity_controller: EntityController
 
     def __init__(self, map_width: int, map_height: int):
+        self.game_turn = 0
+
+        GameTrace.add_game_start()
+
         self.player = templates.PLAYER.spawn(0, 0)
         self.entities = [self.player]
 
@@ -42,6 +49,14 @@ class Game:
                 raise SystemExit
             case tcod.event.KeyDown(sym=tcod.event.KeySym.ESCAPE):
                 raise SystemExit
+            case tcod.event.KeyDown(sym=tcod.event.KeySym.L):
+                if event.mod & tcod.event.Modifier.SHIFT:
+                    dump_game_trace_to_file()
+                else:
+                    print()
+                    GameTrace.log.print_last(5)
+                    print()
+
         
         player_dx = 0
         player_dy = 0
@@ -78,12 +93,15 @@ class Game:
                     player_passed_turn = True
 
             if player_dx != 0 or player_dy != 0:
-                self.entity_controller.move_or_bump(self.player, player_dx, player_dy)
+                self.entity_controller.player_move_or_bump(self.player, player_dx, player_dy)
                 self.update_fov()
                 player_passed_turn = True
 
             if player_passed_turn:
                 self.entity_controller.process_entity_turns()
+                self.game_turn += 1
+                GameTrace.add_tick(self.game_turn)
+
 
     def draw(self, console: tcod.console.Console) -> None:
         self.game_map.draw(console)
@@ -101,3 +119,11 @@ class Game:
             radius=8
         )
         self.game_map.explored |= self.game_map.visible
+
+def dump_game_trace_to_file():
+    if not os.path.exists("log"):
+        os.makedirs("log")
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f"log/game_trace_{timestamp}.log"
+    with open(filename, "w") as f:
+        f.write(GameTrace.log.get_str())

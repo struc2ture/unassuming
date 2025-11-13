@@ -4,6 +4,7 @@ import numpy as np
 import tcod
 
 from game_map import GameMap
+from game_trace import GameTrace
 from entity import Actor, Entity
 
 class EntityController:
@@ -29,20 +30,30 @@ class EntityController:
                     return entity
         return None
 
-    def move(self, entity: Entity, dx: int, dy: int) -> None:
-        new_x = entity.x + dx
-        new_y = entity.y + dy
-        if (
-            self.game_map.pos_walkable(new_x, new_y) and
-            self.get_blocking_entity_at(new_x, new_y) is None
-        ):
-            entity.set_pos(new_x, new_y)
+    def move(self, entity: Entity, x: int, y: int) -> None:
+        log_entry = GameTrace.log.add_entry("MOVE")
+        log_entry.add_item(f"entity: {entity.name}")
+        log_entry.add_item(f"from: {entity.pos}")
+
+        entity.set_pos(x, y)
+
+        log_entry.add_item(f"to: {entity.pos}")
 
     def attack(self, attacker: Actor, defender: Actor) -> None:
-        damage = min(max(attacker.stats.attack - defender.stats.defense, 0), defender.stats.hp)
+        entry = GameTrace.log.add_entry("ATTACK")
+        entry.add_item(f"attacker: {attacker.name} ({attacker.stats.hp}/{attacker.stats.max_hp} HP)")
+        entry.add_item(f"defender: {defender.name} ({defender.stats.hp}/{defender.stats.max_hp} HP)")
+
+        attack_roll = attacker.stats.attack.roll()
+        entry.add_item(f"attack_roll: {attacker.stats.attack} -> {attack_roll}")
+        entry.add_item(f"defense: {defender.stats.defense}")
+
+        damage = min(max(attack_roll - defender.stats.defense, 0), defender.stats.hp)
+        entry.add_item(f"damage: {damage}")
         defender.stats.hp -= damage
         if defender.stats.hp <= 0:
             defender.die()
+            entry.add_item(f"defender_died: true")
 
         log_line = f'{attacker.name} swings at {defender.name}, '
         log_line += f'and deals {damage} damage' if damage > 0 else 'but misses'
@@ -56,7 +67,7 @@ class EntityController:
     def skip_turn(self, entity: Entity) -> None:
         pass
  
-    def move_or_bump(self, entity: Entity, dx: int, dy: int) -> None:
+    def player_move_or_bump(self, entity: Entity, dx: int, dy: int) -> None:
         new_x = entity.x + dx
         new_y = entity.y + dy
         if self.game_map.pos_walkable(new_x, new_y):
@@ -64,14 +75,14 @@ class EntityController:
             if bumped_entity and bumped_entity is not entity:
                 self.bump(entity, bumped_entity)
             else:
-                entity.set_pos(new_x, new_y)
+                self.move(entity, new_x, new_y)
 
-    def teleport_or_bump(self, entity: Entity, x: int, y: int) -> None:
+    def entity_move_or_bump(self, entity: Entity, x: int, y: int) -> None:
         bumped_entity = self.get_blocking_entity_at(x, y)
         if bumped_entity and bumped_entity is not entity:
                 self.bump(entity, bumped_entity)
         else:
-            entity.set_pos(x, y)
+            self.move(entity, x, y)
 
     def get_path_to(self, entity: Entity, dest_x: int, dest_y: int) -> List[Tuple[int, int]]:
         cost = np.array(self.game_map.tiles["walkable"], dtype=np.int8)
@@ -114,7 +125,7 @@ class EntityController:
             path = self.get_path_to(entity, *target_entity.pos)
             if path:
                 next_step = path.pop(0)
-                self.teleport_or_bump(entity, *next_step)
+                self.entity_move_or_bump(entity, *next_step)
 
     def process_entity_turns(self):
         for entity in self.entities:

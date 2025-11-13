@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import copy
+from dataclasses import dataclass, field
 from enum import auto, Enum
 from typing import Optional, Tuple, Type, TypeVar
 
 import tcod
+
+from dice import Dice
 
 T = TypeVar("T", bound="Entity")
 
@@ -71,19 +74,12 @@ class Entity:
             fg=color
         )
 
-
+@dataclass
 class Stats:
-    def __init__(
-            self,
-            hp: int = 0,
-            max_hp: int = 0,
-            attack: int = 0,
-            defense: int = 0
-    ):
-        self.hp: int = hp
-        self.max_hp: int = max_hp
-        self.attack: int = attack
-        self.defense: int = defense
+    hp: int = 0
+    max_hp: int = 0
+    attack: Dice = field(default_factory=lambda: Dice())
+    defense: int = 0
 
 REMAINS_GLYPH = "%"
 REMAINS_COLOR = (150, 30, 30)
