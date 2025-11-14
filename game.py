@@ -8,7 +8,9 @@ from entity import Actor, Entity
 from entity_controller import EntityController
 import templates
 from game_map import GameMap
+from game_state import GameState
 from game_trace import GameTrace
+from inspect_state import InspectState
 import proc_gen
 
 class Game:
@@ -16,8 +18,13 @@ class Game:
     game_map: GameMap
     entities: List[Entity]
     entity_controller: EntityController
+    current_state: Optional[GameState]
+    main_console: tcod.console.Console
 
-    def __init__(self, map_width: int, map_height: int):
+    def __init__(self, map_width: int, map_height: int, main_console: tcod.console.Console):
+        self.main_console = main_console
+        self.current_state = None
+
         self.game_turn = 0
 
         GameTrace.add_game_start()
@@ -50,7 +57,18 @@ class Game:
             case tcod.event.Quit():
                 raise SystemExit
             case tcod.event.KeyDown(sym=tcod.event.KeySym.ESCAPE):
-                raise SystemExit
+                if self.current_state:
+                    self.current_state = None
+                else:
+                    raise SystemExit
+
+        if self.current_state:
+            should_pop = self.current_state.handle_event(context, event)
+            if should_pop:
+                self.current_state = None
+            return
+        
+        match event:
             case tcod.event.KeyDown(sym=tcod.event.KeySym.L):
                 if event.mod & tcod.event.Modifier.SHIFT:
                     dump_game_trace_to_file()
@@ -61,11 +79,8 @@ class Game:
             case tcod.event.MouseButtonDown(button=tcod.event.MouseButton.LEFT, tile=tile):
                 entity = self.entity_controller.get_entity_at(int(tile.x), int(tile.y))
                 if entity:
-                    print("\nCLICKED ENTITY:")
-                    print(entity.name)
-                    print(entity.description)
-                    print()
-        
+                    self.current_state = InspectState(self.main_console, entity)
+
         player_dx = 0
         player_dy = 0
         player_passed_turn = False
@@ -119,6 +134,9 @@ class Game:
         for entity in sorted_entities:
             if self.game_map.pos_visible(*entity.pos):
                 entity.draw(console)
+
+        if self.current_state:
+            self.current_state.render(console)
 
     def update_fov(self) -> None:
         self.game_map.visible[:] = tcod.map.compute_fov(

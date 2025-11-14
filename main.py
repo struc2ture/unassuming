@@ -12,7 +12,7 @@ def main() -> None:
     tcod.tileset.procedural_block_elements(tileset=tileset)
     console = tcod.console.Console(80, 50, order="F")
 
-    game = Game(80, 50)
+    game = Game(80, 50, console)
 
     with tcod.context.new(console=console, tileset=tileset, title="Unassuming") as context:
         while True:  # Main loop

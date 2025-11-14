@@ -21,7 +21,7 @@ CRANE = Actor.actor_template(
     name="Crane",
     description=textwrap.dedent("""\
         A long-necked manifestation. Whoever called it a "bird" could not have played a crueler joke.
-        It is a vestigial structure of a long-forgotten chimera that used crane-like-arms to reach into deep and narrow cavities.
+        It is a vestigial structure of a long-forgotten chimera that used its numerous crane-like-arms to reach into deep and narrow cavities.
         Swarms of cranes have been harassing adventurers for centuries.
         While relatively harmless individually - nothing more than swatting a fly, leaving a bloody splat, - extremely dangerous in groups."""),
     stats=Stats(3, 3, Dice.from_expr("1d3"), 0)
@@ -32,8 +32,8 @@ BULB = Actor.actor_template(
     color=(30, 100, 30),
     name="Bulb",
     description=textwrap.dedent("""\
-        Bulb A bulbous shape. A mass of flesh. A mess of flashing, blinking eyes.
+        A bulbous shape. A mass of flesh. A mess of flashing, blinking eyes.
         It sees all, contemplates all. It acts little, conserving energy.
-        Don't be so foolish to stand still: if you get hit by the bulb,  you will not just feel embarrassed by your lack of agility - you will also most certainly feel the life drain out of your behind."""),
+        Don't be so foolish to stand still: if you get hit by the bulb,  you will not just feel embarrassed by your lack of agility - you will also most certainly feel the life drain out from your behind."""),
     stats=Stats(15, 15, Dice.from_expr("2d6"), 3)
 )
