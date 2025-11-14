@@ -22,9 +22,9 @@ class Entity:
         self.x: int = 0
         self.y: int = 0
 
-        self.glyph: str = "0"
-        self.color: Tuple[int, int, int] = (255, 0, 0)
-        self.render_layer = RenderLayer.DEFAULT
+        self._glyph: str = "0"
+        self._color: Tuple[int, int, int] = (255, 0, 0)
+        self._render_layer = RenderLayer.DEFAULT
 
         self._name: str = "<Unnamed>"
         self.description: str = "<Undescribed>"
@@ -36,6 +36,18 @@ class Entity:
     @property
     def name(self):
         return self._name
+    
+    @property
+    def glyph(self):
+        return self._glyph
+    
+    @property
+    def color(self):
+        return self._color
+    
+    @property
+    def render_layer(self):
+        return self._render_layer
 
     @staticmethod
     def entity_template(glyph: str, color: Tuple[int, int, int], name: str, description: str) -> Entity:
@@ -44,8 +56,8 @@ class Entity:
         return template
     
     def init_common(self, glyph: str, color: Tuple[int, int, int], name: str, description: str):
-        self.glyph = glyph
-        self.color = color
+        self._glyph = glyph
+        self._color = color
         self._name = name
         self.description = description
         self.is_blocking = True
@@ -102,7 +114,7 @@ class Actor(Entity):
     ) -> Actor:
         template: Actor = Actor()
         template.init_common(glyph, color, name, description)
-        template.render_layer = RenderLayer.ACTOR
+        template._render_layer = RenderLayer.ACTOR
         template.stats = stats
         template.is_alive = is_alive
         return template
@@ -110,11 +122,6 @@ class Actor(Entity):
     def die(self):
         self.is_alive = False
         self.is_blocking = False
-        # NOTE(A): It feels off to set it here.
-        #          If remains' glyph and color is handled with the is_alive flag,
-        #          it feels like the 'renderer' should handle the render order with that flag too.
-        #          But I don't handle render order inside the Entity.draw, so I will keep this logic for now.
-        self.render_layer = RenderLayer.CORPSE
 
     @property
     def name(self):
@@ -123,12 +130,14 @@ class Actor(Entity):
             n += " (corpse)"
         return n
 
-    def draw(self, console: tcod.console.Console) -> None:
-        glyph = self.glyph if self.is_alive else REMAINS_GLYPH
-        color = self.color if self.is_alive else REMAINS_COLOR
-        console.print(
-            x=self.x,
-            y=self.y,
-            text=glyph,
-            fg=color
-        )
+    @property
+    def glyph(self):
+        return self._glyph if self.is_alive else REMAINS_GLYPH
+
+    @property
+    def color(self):
+        return self._color if self.is_alive else REMAINS_COLOR
+    
+    @property
+    def render_layer(self):
+        return self._render_layer if self.is_alive else RenderLayer.CORPSE

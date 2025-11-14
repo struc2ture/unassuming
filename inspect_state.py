@@ -36,11 +36,19 @@ class InspectState(GameState):
         cursor_x = 1
         cursor_y = 2
 
+        name_str = f"{self.inspected_entity.name} - " 
         self.this_console.print(
             cursor_x,
             cursor_y,
-            text=f"Name: {self.inspected_entity.name}",
+            text=name_str,
             fg=(255, 255, 255))
+        
+        self.this_console.print(
+            cursor_x + len(name_str),
+            cursor_y,
+            text=self.inspected_entity.glyph,
+            fg=self.inspected_entity.color
+        )
 
         cursor_y += 2
 
