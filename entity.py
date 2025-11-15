@@ -7,6 +7,7 @@ from typing import Optional, Tuple, Type, TypeVar
 
 import tcod
 
+from dialog import CharacterLine
 from dice import Dice
 
 T = TypeVar("T", bound="Entity")
@@ -101,6 +102,8 @@ class Actor(Entity):
         super().__init__()
 
         self.stats: Stats = Stats()
+        self.is_hostile: bool = False
+        self.dialog: Optional[CharacterLine] = None
         self.is_alive: bool = False
 
     @staticmethod
@@ -110,12 +113,16 @@ class Actor(Entity):
             name: str,
             description: str,
             stats: Stats,
-            is_alive: bool = True
+            is_hostile: bool = True,
+            dialog: Optional[CharacterLine] = None,
+            is_alive: bool = True,
     ) -> Actor:
         template: Actor = Actor()
         template.init_common(glyph, color, name, description)
         template._render_layer = RenderLayer.ACTOR
         template.stats = stats
+        template.is_hostile = is_hostile
+        template.dialog = dialog
         template.is_alive = is_alive
         return template
 

@@ -4,6 +4,7 @@ from typing import List, Optional
 
 import tcod
 
+import dialog
 from entity import Actor, Entity
 from entity_controller import EntityController
 import templates

@@ -9,29 +9,30 @@ from entity import Actor, Entity
 from game_state import GameState
 
 class InspectState(GameState):
-    def __init__(self, main_console: tcod.console.Console, inspected_entity: Entity):
-        self.main_console: tcod.console.Console = main_console
+    def __init__(self, parent_console: tcod.console.Console, inspected_entity: Entity):
         self.width: int = 30
         self.height: int = 40
-        self.this_console: tcod.console.Console = tcod.Console(self.width, self.height)
-        self.anchor: Tuple[int, int] = (main_console.width, 0)
-        self.offset: Tuple[int, int] = (-self.width - 6, (self.main_console.height - self.height) // 2)
+        self.this_console: tcod.console.Console = tcod.console.Console(self.width, self.height)
+        self.anchor: Tuple[int, int] = (parent_console.width, 0)
+        self.offset: Tuple[int, int] = (-self.width - 6, (parent_console.height - self.height) // 2)
         self.inspected_entity: Entity = inspected_entity
 
-    def render(self, console: tcod.console.Console) -> None:
+    def render(self, parent_console: tcod.console.Console) -> None:
         self.this_console.draw_frame(
             0,
             0,
             self.this_console.width,
             self.this_console.height,
-            decoration="┼─┼│ │┼─┼")
+            decoration="┼─┼│ │┼─┼"
+        )
         self.this_console.print(
             0,
             0,
             width=self.this_console.width,
             height=1,
-            text="┤Inspect├", #text="---Inspect---",
-            alignment=tcod.constants.CENTER)
+            text="┤Inspect├",
+            alignment=tcod.constants.CENTER
+        )
 
         cursor_x = 1
         cursor_y = 2
@@ -94,7 +95,7 @@ class InspectState(GameState):
                 cursor_y += 1
             cursor_y += 1
 
-        self.this_console.blit(console, self.anchor[0] + self.offset[0], self.anchor[1] + self.offset[1], bg_alpha=0.9)
+        self.this_console.blit(parent_console, self.anchor[0] + self.offset[0], self.anchor[1] + self.offset[1], bg_alpha=0.9)
 
     def handle_event(self, context: Context, event: Event) -> bool:
         should_pop = False

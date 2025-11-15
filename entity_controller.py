@@ -3,7 +3,9 @@ from typing import List, Tuple, Optional
 import numpy as np
 import tcod
 
+from dialog_state import DialogState
 from game_map import GameMap
+from game_state import GameState
 from game_trace import GameTrace
 from entity import Actor, Entity
 
@@ -62,11 +64,14 @@ class EntityController:
 
     def bump(self, entity: Entity, bumped_entity: Entity) -> None:
         if isinstance(entity, Actor) and isinstance(bumped_entity, Actor):
-            self.attack(entity, bumped_entity)
+            if entity is self.player and not bumped_entity.is_hostile and bumped_entity.dialog:
+                pass # start dialog 
+            else:
+                self.attack(entity, bumped_entity)
 
     def skip_turn(self, entity: Entity) -> None:
         pass
- 
+
     def player_move_or_bump(self, entity: Entity, dx: int, dy: int) -> None:
         new_x = entity.x + dx
         new_y = entity.y + dy
