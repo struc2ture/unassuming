@@ -7,7 +7,7 @@ import tcod
 
 from entity import Entity
 import templates
-from game_map import GameMap
+from tile_map import TileMap
 import tile_types
 
 class RectangularRoom:
@@ -106,8 +106,8 @@ def generate_map(
     spec: MapSpec,
     player: Entity,
     entities: List[Entity]
-) -> GameMap:
-    map = GameMap(spec.map_width, spec.map_height)
+) -> TileMap:
+    map = TileMap(spec.map_width, spec.map_height)
 
     rooms: List[RectangularRoom] = []
 

@@ -3,21 +3,36 @@ from typing import List, Tuple, Optional
 import numpy as np
 import tcod
 
-from dialog_state import DialogState
-from game_map import GameMap
-from game_state import GameState
+from tile_map import TileMap
 from game_trace import GameTrace
 from entity import Actor, Entity
+import proc_gen
+import templates
 
-class EntityController:
-    game_map: GameMap
+class GameLogic:
+    tile_map: TileMap
     entities: List[Entity]
-    player: Entity
+    player: Actor
 
-    def __init__(self, game_map: GameMap, entities: List[Entity], player: Entity):
-        self.game_map = game_map
-        self.entities = entities
-        self.player = player
+    def __init__(self, map_width: int, map_height: int):
+        self.player = templates.PLAYER.spawn(0, 0)
+        self.entities = [self.player]
+
+        map_spec = proc_gen.MapSpec(
+            max_rooms=30,
+            room_min_size=6,
+            room_max_size=10,
+            map_width=map_width,
+            map_height=map_height,
+            max_monsters_per_room=2
+        )
+        self.tile_map = proc_gen.generate_map(
+            map_spec,
+            player=self.player,
+            entities=self.entities
+        )
+
+        self.update_fov()
 
     def get_entity_at(self, x: int, y: int) -> Optional[Entity]:
         for entity in self.entities:
@@ -75,12 +90,14 @@ class EntityController:
     def player_move_or_bump(self, entity: Entity, dx: int, dy: int) -> None:
         new_x = entity.x + dx
         new_y = entity.y + dy
-        if self.game_map.pos_walkable(new_x, new_y):
+        if self.tile_map.pos_walkable(new_x, new_y):
             bumped_entity = self.get_blocking_entity_at(new_x, new_y)
             if bumped_entity and bumped_entity is not entity:
                 self.bump(entity, bumped_entity)
             else:
                 self.move(entity, new_x, new_y)
+
+        self.update_fov()
 
     def entity_move_or_bump(self, entity: Entity, x: int, y: int) -> None:
         bumped_entity = self.get_blocking_entity_at(x, y)
@@ -90,7 +107,7 @@ class EntityController:
             self.move(entity, x, y)
 
     def get_path_to(self, entity: Entity, dest_x: int, dest_y: int) -> List[Tuple[int, int]]:
-        cost = np.array(self.game_map.tiles["walkable"], dtype=np.int8)
+        cost = np.array(self.tile_map.tiles["walkable"], dtype=np.int8)
 
         # NOTE(A): Cost = 0 means the tile is completely blocked.
         # Walkable tiles have cost = 1 -- the minimum cost.
@@ -122,18 +139,14 @@ class EntityController:
 
         # Convert from List[List[int]] to List[Tuple[int, int]]
         return [(index[0], index[1]) for index in path]
-
-    def process_entity_turn(self, entity: Entity):
-        target_entity = self.player
-        # NOTE(A): This is if PLAYER sees the acting entity (for now)
-        if self.game_map.visible[entity.x, entity.y]:
-            path = self.get_path_to(entity, *target_entity.pos)
-            if path:
-                next_step = path.pop(0)
-                self.entity_move_or_bump(entity, *next_step)
+    
+    def update_fov(self) -> None:
+        self.tile_map.visible[:] = tcod.map.compute_fov(
+            self.tile_map.tiles["transparent"],
+            (self.player.x, self.player.y),
+            radius=8
+        )
+        self.tile_map.explored |= self.tile_map.visible
 
     def process_entity_turns(self):
-        for entity in self.entities:
-            # print(f'Processing entity {entity.name}. Actor: {isinstance(entity, Actor)}. Alive: {isinstance(entity, Actor) and entity.is_alive}')
-            if isinstance(entity, Actor) and entity is not self.player and entity.is_alive:
-                self.process_entity_turn(entity)
+        pass

@@ -5,7 +5,7 @@ import tcod
 
 import tile_types
 
-class GameMap:
+class TileMap:
     cols: int
     rows: int
 

@@ -4,53 +4,32 @@ from typing import List, Optional
 
 import tcod
 
-import dialog
-from entity import Actor, Entity
-from entity_controller import EntityController
-import templates
-from game_map import GameMap
+from actor_controller import ActorController
+from entity import Actor
+from game_logic import GameLogic
 from game_state import GameState
 from game_trace import GameTrace
 from inspect_state import InspectState
-import proc_gen
 
-class Game:
-    player: Actor
-    game_map: GameMap
-    entities: List[Entity]
-    entity_controller: EntityController
+class GameApp:
+    game_turn: int
+    game_logic: GameLogic
+    actor_controller: ActorController
     current_state: Optional[GameState]
     main_console: tcod.console.Console
 
     def __init__(self, map_width: int, map_height: int, main_console: tcod.console.Console):
         self.main_console = main_console
         self.current_state = None
-
         self.game_turn = 0
+
+        self.game_logic = GameLogic(map_width, map_height)
+
+        self.actor_controller = ActorController(self.game_logic)
 
         GameTrace.add_game_start()
         GameTrace.add_tick(self.game_turn)
 
-        self.player = templates.PLAYER.spawn(0, 0)
-        self.entities = [self.player]
-
-        map_spec = proc_gen.MapSpec(
-            max_rooms=30,
-            room_min_size=6,
-            room_max_size=10,
-            map_width=map_width,
-            map_height=map_height,
-            max_monsters_per_room=2
-        )   
-        self.game_map = proc_gen.generate_map(
-            map_spec,
-            player=self.player,
-            entities=self.entities
-        )
-
-        self.entity_controller = EntityController(game_map=self.game_map, entities=self.entities, player=self.player)
-
-        self.update_fov()
 
     def handle_event(self, context: tcod.context.Context, event: tcod.event.Event) -> None:
         context.convert_event(event)  # Adds tile coordinates to mouse events.
@@ -78,7 +57,7 @@ class Game:
                     GameTrace.log.print_last(5)
                     print()
             case tcod.event.MouseButtonDown(button=tcod.event.MouseButton.LEFT, tile=tile):
-                entity = self.entity_controller.get_entity_at(int(tile.x), int(tile.y))
+                entity = self.game_logic.get_entity_at(int(tile.x), int(tile.y))
                 if entity:
                     self.current_state = InspectState(self.main_console, entity)
 
@@ -86,7 +65,7 @@ class Game:
         player_dy = 0
         player_passed_turn = False
 
-        if self.player.is_alive:
+        if self.game_logic.player.is_alive:
             match event:
                 case tcod.event.KeyDown(sym=tcod.event.KeySym.Q):
                     player_dx = -1
@@ -113,39 +92,34 @@ class Game:
                     player_dx = -1
                     player_dy =  0
                 case tcod.event.KeyDown(sym=tcod.event.KeySym.S):
-                    self.entity_controller.skip_turn(self.player)
+                    self.game_logic.skip_turn(self.game_logic.player)
                     player_passed_turn = True
 
             if player_dx != 0 or player_dy != 0:
-                self.entity_controller.player_move_or_bump(self.player, player_dx, player_dy)
-                self.update_fov()
+                self.game_logic.player_move_or_bump(self.game_logic.player, player_dx, player_dy)
                 player_passed_turn = True
 
             if player_passed_turn:
-                self.entity_controller.process_entity_turns()
+                for entity in self.game_logic.entities:
+                    # print(f'Processing entity {entity.name}. Actor: {isinstance(entity, Actor)}. Alive: {isinstance(entity, Actor) and entity.is_alive}')
+                    if isinstance(entity, Actor) and entity is not self.game_logic.player and entity.is_alive:
+                        self.actor_controller.process_actor_turn(entity)
+
                 self.game_turn += 1
                 GameTrace.add_tick(self.game_turn)
 
 
     def draw(self, console: tcod.console.Console) -> None:
-        self.game_map.draw(console)
+        self.game_logic.tile_map.draw(console)
         sorted_entities = sorted(
-            self.entities, key=lambda x: x.render_layer.value
+            self.game_logic.entities, key=lambda x: x.render_layer.value
         )
         for entity in sorted_entities:
-            if self.game_map.pos_visible(*entity.pos):
+            if self.game_logic.tile_map.pos_visible(*entity.pos):
                 entity.draw(console)
 
         if self.current_state:
             self.current_state.render(console)
-
-    def update_fov(self) -> None:
-        self.game_map.visible[:] = tcod.map.compute_fov(
-            self.game_map.tiles["transparent"],
-            (self.player.x, self.player.y),
-            radius=8
-        )
-        self.game_map.explored |= self.game_map.visible
 
 def dump_game_trace_to_file():
     if not os.path.exists("log"):
