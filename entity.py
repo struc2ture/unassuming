@@ -113,6 +113,7 @@ class Actor(Entity):
             name: str,
             description: str,
             stats: Stats,
+            *,
             is_hostile: bool = True,
             dialog: Optional[CharacterLine] = None,
             is_alive: bool = True,

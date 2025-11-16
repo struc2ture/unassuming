@@ -5,6 +5,7 @@ import tcod
 
 from tile_map import TileMap
 from game_trace import GameTrace
+from game_effect import GameEffect, StartDialogGameEffect
 from entity import Actor, Entity
 import proc_gen
 import templates
@@ -77,27 +78,28 @@ class GameLogic:
         log_line += '.' if defender.is_alive else ', killing them.'
         print(log_line)
 
-    def bump(self, entity: Entity, bumped_entity: Entity) -> None:
+    def bump(self, entity: Entity, bumped_entity: Entity) -> List[GameEffect]:
         if isinstance(entity, Actor) and isinstance(bumped_entity, Actor):
             if entity is self.player and not bumped_entity.is_hostile and bumped_entity.dialog:
-                pass # start dialog 
+                return [StartDialogGameEffect(bumped_entity)]
             else:
                 self.attack(entity, bumped_entity)
+        return []
 
     def skip_turn(self, entity: Entity) -> None:
         pass
 
-    def player_move_or_bump(self, entity: Entity, dx: int, dy: int) -> None:
+    def player_move_or_bump(self, entity: Entity, dx: int, dy: int) -> List[GameEffect]:
         new_x = entity.x + dx
         new_y = entity.y + dy
         if self.tile_map.pos_walkable(new_x, new_y):
             bumped_entity = self.get_blocking_entity_at(new_x, new_y)
             if bumped_entity and bumped_entity is not entity:
-                self.bump(entity, bumped_entity)
+                return self.bump(entity, bumped_entity)
             else:
                 self.move(entity, new_x, new_y)
-
         self.update_fov()
+        return []
 
     def entity_move_or_bump(self, entity: Entity, x: int, y: int) -> None:
         bumped_entity = self.get_blocking_entity_at(x, y)
@@ -147,6 +149,3 @@ class GameLogic:
             radius=8
         )
         self.tile_map.explored |= self.tile_map.visible
-
-    def process_entity_turns(self):
-        pass

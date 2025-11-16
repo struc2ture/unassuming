@@ -125,14 +125,15 @@ def generate_map(
 
         map.tiles[new_room.inner] = tile_types.floor
 
-        if len(rooms) == 0:
-            player.set_pos(*new_room.center)
-        else:
+        if len(rooms) > 0: # skip the first room
             for x, y in tunnel_between(rooms[-1].center, new_room.center):
                 map.tiles[x, y] = tile_types.floor
-
-        place_room_entities(new_room, entities, spec.max_monsters_per_room)
+            place_room_entities(new_room, entities, spec.max_monsters_per_room)
 
         rooms.append(new_room)
+
+    player.set_pos(*rooms[0].center)
+
+    entities.append(templates.USHER.spawn(rooms[0].center[0], rooms[0].center[1] + 1))
 
     return map

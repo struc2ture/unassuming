@@ -1,5 +1,6 @@
 import textwrap
 
+from dialog import C
 from dice import Dice
 from entity import Entity, Actor, Stats
 
@@ -36,4 +37,18 @@ BULB = Actor.actor_template(
         It sees all, contemplates all. It acts little, conserving energy.
         Don't be so foolish to stand still: if you get hit by the bulb,  you will not just feel embarrassed by your lack of agility - you will also most certainly feel the life drain out from your behind."""),
     stats=Stats(15, 15, Dice.from_expr("2d6"), 3)
+)
+
+USHER = Actor.actor_template(
+    glyph="U",
+    color=(130, 200, 130),
+    name="Usher",
+    description=textwrap.dedent("""\
+        This man looks suspiciously friendly for the kind of place you both find yourself in.
+        As soon as he notices you, he makes eye contact and puts on a polite smile.
+        You can smell an air of officiality in the vicinity. "Sandalwood and lilac," crosses your absent mind.
+        The shine of the precious stone - diamond? - on the man's neck fills you with respect for the man, and a craving to apropriate the said respect for yourself."""),
+    stats=Stats(20, 20, Dice.from_expr("2d10"), 3),
+    is_hostile=False,
+    dialog=C[0]
 )

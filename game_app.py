@@ -6,10 +6,12 @@ import tcod
 
 from actor_controller import ActorController
 from entity import Actor
+from game_effect import *
 from game_logic import GameLogic
 from game_state import GameState
 from game_trace import GameTrace
 from inspect_state import InspectState
+from dialog_state import DialogState
 
 class GameApp:
     game_turn: int
@@ -96,7 +98,11 @@ class GameApp:
                     player_passed_turn = True
 
             if player_dx != 0 or player_dy != 0:
-                self.game_logic.player_move_or_bump(self.game_logic.player, player_dx, player_dy)
+                effects = self.game_logic.player_move_or_bump(self.game_logic.player, player_dx, player_dy)
+                for effect in effects:
+                    match effect:
+                        case StartDialogGameEffect(with_actor=with_actor):
+                            self.current_state = DialogState(self.main_console, with_actor)
                 player_passed_turn = True
 
             if player_passed_turn:
@@ -107,7 +113,6 @@ class GameApp:
 
                 self.game_turn += 1
                 GameTrace.add_tick(self.game_turn)
-
 
     def draw(self, console: tcod.console.Console) -> None:
         self.game_logic.tile_map.draw(console)
