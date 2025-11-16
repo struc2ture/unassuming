@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import textwrap
 from typing import List, Tuple
 
@@ -8,13 +11,16 @@ from entity import Actor
 from game_state import GameState
 from game_logic import GameLogic
 
+if TYPE_CHECKING:
+    from game_app import GameApp
+
 class DialogState(GameState):
     dialog_text: str
     options: List[Tuple[str, CharacterLine | None]]
     pending_action: str | None
 
-    def __init__(self, game_logic: GameLogic, parent_console: tcod.console.Console, with_actor: Actor):
-        super().__init__(game_logic)
+    def __init__(self, game_logic: GameLogic, game_app: GameApp, parent_console: tcod.console.Console, with_actor: Actor):
+        super().__init__(game_logic, game_app)
         self.width: int = 30
         self.height: int = 40
         self.this_console = tcod.console.Console(self.width, self.height)
@@ -93,7 +99,7 @@ class DialogState(GameState):
 
         self.this_console.blit(parent_console, self.anchor[0] + self.offset[0], self.anchor[1] + self.offset[1], bg_alpha=0.9)
 
-    def handle_event(self, context: tcod.context.Context, event: tcod.event.Event) -> bool:
+    def handle_event(self, context: tcod.context.Context, event: tcod.event.Event) -> None:
         selected_choice = -1
         match event:
             case tcod.event.KeyDown(sym=tcod.event.KeySym.N1):
@@ -119,6 +125,4 @@ class DialogState(GameState):
             if self.options[selected_choice][1]:
                 self.set_character_line(self.options[selected_choice][1])
             else:
-                return True
-
-        return False
+                self.game_app.pop_state()

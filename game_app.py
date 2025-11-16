@@ -1,3 +1,4 @@
+
 import datetime
 import os
 from typing import List, Optional
@@ -8,8 +9,8 @@ from actor_controller import ActorController
 from entity import Actor
 from game_effect import *
 from game_logic import GameLogic
-from game_state import GameState
 from game_trace import GameTrace
+from game_state import GameState
 from inspect_state import InspectState
 from dialog_state import DialogState
 
@@ -45,9 +46,7 @@ class GameApp:
                     raise SystemExit
 
         if self.current_state:
-            should_pop = self.current_state.handle_event(context, event)
-            if should_pop:
-                self.current_state = None
+            self.current_state.handle_event(context, event)
             return
 
         match event:
@@ -61,7 +60,7 @@ class GameApp:
             case tcod.event.MouseButtonDown(button=tcod.event.MouseButton.LEFT, tile=tile):
                 entity = self.game_logic.get_entity_at(int(tile.x), int(tile.y))
                 if entity:
-                    self.current_state = InspectState(self.game_logic, self.main_console, entity)
+                    self.push_state(InspectState(self.game_logic, self, self.main_console, entity))
 
         player_dx = 0
         player_dy = 0
@@ -102,7 +101,7 @@ class GameApp:
                 for effect in effects:
                     match effect:
                         case StartDialogGameEffect(with_actor=with_actor):
-                            self.current_state = DialogState(self.game_logic, self.main_console, with_actor)
+                            self.push_state(DialogState(self.game_logic, self, self.main_console, with_actor))
                 player_passed_turn = True
 
             if player_passed_turn:
@@ -113,6 +112,12 @@ class GameApp:
 
                 self.game_turn += 1
                 GameTrace.add_tick(self.game_turn)
+
+    def pop_state(self):
+        self.current_state = None
+
+    def push_state(self, state: GameState):
+        self.current_state = state
 
     def draw(self, console: tcod.console.Console) -> None:
         self.game_logic.tile_map.draw(console)

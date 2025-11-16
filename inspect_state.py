@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import textwrap
 from typing import Tuple
 
@@ -9,9 +12,12 @@ from entity import Actor, Entity
 from game_state import GameState
 from game_logic import GameLogic
 
+if TYPE_CHECKING:
+    from game_app import GameApp
+
 class InspectState(GameState):
-    def __init__(self, game_logic: GameLogic, parent_console: tcod.console.Console, inspected_entity: Entity):
-        super().__init__(game_logic)
+    def __init__(self, game_logic: GameLogic, game_app: GameApp, parent_console: tcod.console.Console, inspected_entity: Entity):
+        super().__init__(game_logic, game_app)
         self.width: int = 30
         self.height: int = 40
         self.this_console: tcod.console.Console = tcod.console.Console(self.width, self.height)
@@ -99,12 +105,7 @@ class InspectState(GameState):
 
         self.this_console.blit(parent_console, self.anchor[0] + self.offset[0], self.anchor[1] + self.offset[1], bg_alpha=0.9)
 
-    def handle_event(self, context: Context, event: Event) -> bool:
-        should_pop = False
-
+    def handle_event(self, context: Context, event: Event) -> None:
         match event:
             case tcod.event.MouseButtonDown(button=tcod.event.MouseButton.LEFT):
-                should_pop = True
-                return should_pop
-            
-        return should_pop
+                self.game_app.pop_state()
