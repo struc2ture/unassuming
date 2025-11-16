@@ -7,9 +7,11 @@ from tcod.event import Event
 
 from entity import Actor, Entity
 from game_state import GameState
+from game_logic import GameLogic
 
 class InspectState(GameState):
-    def __init__(self, parent_console: tcod.console.Console, inspected_entity: Entity):
+    def __init__(self, game_logic: GameLogic, parent_console: tcod.console.Console, inspected_entity: Entity):
+        super().__init__(game_logic)
         self.width: int = 30
         self.height: int = 40
         self.this_console: tcod.console.Console = tcod.console.Console(self.width, self.height)

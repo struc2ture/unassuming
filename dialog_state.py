@@ -6,12 +6,15 @@ import tcod
 from dialog import CharacterLine, PlayerLine
 from entity import Actor
 from game_state import GameState
+from game_logic import GameLogic
 
 class DialogState(GameState):
     dialog_text: str
     options: List[Tuple[str, CharacterLine | None]]
+    pending_action: str | None
 
-    def __init__(self, parent_console: tcod.console.Console, with_actor: Actor):
+    def __init__(self, game_logic: GameLogic, parent_console: tcod.console.Console, with_actor: Actor):
+        super().__init__(game_logic)
         self.width: int = 30
         self.height: int = 40
         self.this_console = tcod.console.Console(self.width, self.height)
@@ -23,6 +26,7 @@ class DialogState(GameState):
     def set_character_line(self, character_line: CharacterLine | None):
         if character_line:
             self.dialog_text = character_line.text
+            self.pending_action = character_line.action
             if character_line.next_line:
                 self.options = [("<Continue>", character_line.next_line)]
             elif character_line.responses:
@@ -110,6 +114,8 @@ class DialogState(GameState):
                 selected_choice = 7
 
         if 0 <= selected_choice < len(self.options):
+            if self.pending_action == "turn_hostile":
+                self.game_logic.turn_actor_hostile(self.with_actor)
             if self.options[selected_choice][1]:
                 self.set_character_line(self.options[selected_choice][1])
             else:

@@ -89,6 +89,9 @@ class GameLogic:
     def skip_turn(self, entity: Entity) -> None:
         pass
 
+    def turn_actor_hostile(self, actor: Actor) -> None:
+        actor.is_hostile = True
+
     def player_move_or_bump(self, entity: Entity, dx: int, dy: int) -> List[GameEffect]:
         new_x = entity.x + dx
         new_y = entity.y + dy

@@ -49,7 +49,7 @@ class GameApp:
             if should_pop:
                 self.current_state = None
             return
-        
+
         match event:
             case tcod.event.KeyDown(sym=tcod.event.KeySym.L):
                 if event.mod & tcod.event.Modifier.SHIFT:
@@ -61,7 +61,7 @@ class GameApp:
             case tcod.event.MouseButtonDown(button=tcod.event.MouseButton.LEFT, tile=tile):
                 entity = self.game_logic.get_entity_at(int(tile.x), int(tile.y))
                 if entity:
-                    self.current_state = InspectState(self.main_console, entity)
+                    self.current_state = InspectState(self.game_logic, self.main_console, entity)
 
         player_dx = 0
         player_dy = 0
@@ -102,7 +102,7 @@ class GameApp:
                 for effect in effects:
                     match effect:
                         case StartDialogGameEffect(with_actor=with_actor):
-                            self.current_state = DialogState(self.main_console, with_actor)
+                            self.current_state = DialogState(self.game_logic, self.main_console, with_actor)
                 player_passed_turn = True
 
             if player_passed_turn:
