@@ -44,21 +44,14 @@ class USHER_DIALOG:
     C: List[CharacterLine] = [CharacterLine() for _ in range(50)]
     P: List[PlayerLine] = [PlayerLine() for _ in range(50)]
 
-    C[0].init("Dearest of friends!!! Welcome to the dungeon!", [], C[1])
-    C[1].init("Now, before you proceed, I must give you one single piece of advice!", [P[0]])
-
-    P[0].init("...", C[2])
-
-    C[2].init("Turn back. If it's not too late, if you still remember how you came in here, turn back and leave this godforsaken place.", [P[1]])
-
-    P[1].init("...", C[3])
-
-    C[3].init("Turn back I tell you!!!", [], C[4])
-    C[4].init("You came here looking for glory and recognition... You're convinced the rumors about this place are for everyone else but you. And you may be right. Ohhhh you may be TOO right for your own damn good...", [], C[5])
-    C[5].init("You will find all of it here. This place is dangerous, but you are a hero. It is true. I can see it in your eyes.", [], C[6])
-    C[6].init("Nothing can hold you back. Nothing can stop you...", [P[2]])
-
-    P[2].init("<Leave the man to continue his blabberings....>")
+    C[0].init("Ah! A new visitor! My dearest of guests, I hope you enjoy your stay at this unassuming cavern that I happen to call my home.", [], C[1])
+    C[1].init("There is someone for everyone here!", [], C[2])
+    C[2].init("Looking for gold? You will find plenty of it here.", [], C[3])
+    C[3].init("Looking for riches? I already mentioned the gold! But this dungeon is a place of business too! - A perfect investment opportunity!", [], C[4])
+    C[4].init("Looking for fame? This is the place where LEGENDS are born. And MYTHS are disseminated. And now you are PART OF IT.", [], C[5])
+    C[5].init("You've heard of the dangers this place entombs, but you are tough, you are a hero! Those stories are all written for someone else!", [], C[6])
+    C[6].init("Don't bother turning around and looking for the exit... A completely natural and non-magical landslide oh so conveniently sealed the door behind you. I guess you will just have to stay and explore a little bit!", [], C[7])
+    C[7].init("Not to worry! I am here to soften the blows and harden the steel!")
 
     start = C[0]
 
