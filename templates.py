@@ -1,6 +1,7 @@
+from typing import List
 import textwrap
 
-from dialog import C
+from dialog import CharacterLine, PlayerLine
 from dice import Dice
 from entity import Entity, Actor, Stats
 
@@ -39,6 +40,28 @@ BULB = Actor.actor_template(
     stats=Stats(15, 15, Dice.from_expr("2d6"), 3)
 )
 
+class USHER_DIALOG:
+    C: List[CharacterLine] = [CharacterLine() for _ in range(50)]
+    P: List[PlayerLine] = [PlayerLine() for _ in range(50)]
+
+    C[0].init("Dearest of friends!!! Welcome to the dungeon!", [], C[1])
+    C[1].init("Now, before you proceed, I must give you one single piece of advice!", [P[0]])
+
+    P[0].init("...", C[2])
+
+    C[2].init("Turn back. If it's not too late, if you still remember how you came in here, turn back and leave this godforsaken place.", [P[1]])
+
+    P[1].init("...", C[3])
+
+    C[3].init("Turn back I tell you!!!", [], C[4])
+    C[4].init("You came here looking for glory and recognition... You're convinced the rumors about this place are for everyone else but you. And you may be right. Ohhhh you may be TOO right for your own damn good...", [], C[5])
+    C[5].init("You will find all of it here. This place is dangerous, but you are a hero. It is true. I can see it in your eyes.", [], C[6])
+    C[6].init("Nothing can hold you back. Nothing can stop you...", [P[2]])
+
+    P[2].init("<Leave the man to continue his blabberings....>")
+
+    start = C[0]
+
 USHER = Actor.actor_template(
     glyph="U",
     color=(130, 200, 130),
@@ -50,5 +73,5 @@ USHER = Actor.actor_template(
         The shine of the precious stone - diamond? - on the man's neck fills you with respect for the man, and a craving to apropriate the said respect for yourself."""),
     stats=Stats(20, 20, Dice.from_expr("2d10"), 3),
     is_hostile=False,
-    dialog=C[0]
+    dialog=USHER_DIALOG.start
 )
