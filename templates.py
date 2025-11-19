@@ -68,3 +68,23 @@ USHER = Actor.actor_template(
     is_hostile=False,
     dialog=USHER_DIALOG.start
 )
+
+A_MEEK_MAN = Actor.actor_template(
+    glyph="⌡",
+    color=(0, 0, 0),
+    name="A Meek Man",
+    description=textwrap.dedent("""\
+        <Description>"""),
+    stats=Stats(),
+    is_hostile=False
+)
+
+A_LORD = Actor.actor_template(
+    glyph="Ç",
+    color=(0, 0, 0),
+    name="A Lord",
+    description=textwrap.dedent("""\
+        <Description>"""),
+    stats=Stats(),
+    is_hostile=False
+)
