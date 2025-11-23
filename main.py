@@ -12,15 +12,15 @@ def main() -> None:
     tcod.tileset.procedural_block_elements(tileset=tileset)
     console = tcod.console.Console(80, 50, order="F")
 
-    game = GameApp(80, 50, console)
+    game_app = GameApp(80, 50, console)
 
     with tcod.context.new(console=console, tileset=tileset, title="Unassuming") as context:
         while True:  # Main loop
             for event in tcod.event.wait():  # Event loop, blocks until pending events exist
-                game.handle_event(context, event)
+                game_app.handle_event(context, event)
             
             console.clear()
-            game.draw(console)
+            game_app.draw(console)
             context.present(console)  # Render the console to the window and show it
 
 

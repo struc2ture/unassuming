@@ -9,11 +9,12 @@ class CharacterLine:
     next_line: Optional[CharacterLine] = None
     action: Optional[str] = None
 
-    def init(self, text: str, responses: Optional[List[PlayerLine]] = None, next_line: Optional[CharacterLine] = None, action: Optional[str] = None):
+    def init(self, text: str, responses: Optional[List[PlayerLine]] = None, next_line: Optional[CharacterLine] = None, action: Optional[str] = None) -> CharacterLine:
         self.text = text
         self.responses = responses or []
         self.next_line = next_line
         self.action = action
+        return self
 
 
 @dataclass
@@ -21,9 +22,10 @@ class PlayerLine:
     text: str = "<...>"
     character_line: Optional[CharacterLine] = None
 
-    def init(self, text: str, character_line: Optional[CharacterLine] = None):
+    def init(self, text: str, character_line: Optional[CharacterLine] = None) -> PlayerLine:
         self.text = text
         self.character_line = character_line
+        return self
 
 
 C: List[CharacterLine] = [CharacterLine() for _ in range(50)]

@@ -87,19 +87,28 @@ def tunnel_between(
 def place_room_entities(
     room: RectangularRoom,
     entities: List[Entity],
-    max_monsters: int
+    max_monsters: int,
+    is_hostile_room: bool
 ) -> None:
     monster_count = random.randint(0, max_monsters)
+    if is_hostile_room:
+        for i in range(monster_count):
+            x = random.randint(room.x1 + 1, room.x2 - 1)
+            y = random.randint(room.y1 + 1, room.y2 - 1)
 
-    for i in range(monster_count):
+            if not any(entity.x == x and entity.y == y for entity in entities):
+                if random.random() < 0.8:
+                    entities.append(templates.CRANE.spawn(x, y))
+                else:
+                    entities.append(templates.BULB.spawn(x, y))
+    else:
+        npc_template = random.choice(templates.NPCS)
+
         x = random.randint(room.x1 + 1, room.x2 - 1)
         y = random.randint(room.y1 + 1, room.y2 - 1)
 
         if not any(entity.x == x and entity.y == y for entity in entities):
-            if random.random() < 0.8:
-                entities.append(templates.CRANE.spawn(x, y))
-            else:
-                entities.append(templates.BULB.spawn(x, y))
+            entities.append(npc_template.spawn(x, y))
 
 
 def generate_map(
@@ -128,7 +137,8 @@ def generate_map(
         if len(rooms) > 0: # skip the first room
             for x, y in tunnel_between(rooms[-1].center, new_room.center):
                 map.tiles[x, y] = tile_types.floor
-            place_room_entities(new_room, entities, spec.max_monsters_per_room)
+            place_hostile = random.randint(0, 1) == 0
+            place_room_entities(new_room, entities, spec.max_monsters_per_room, place_hostile)
 
         rooms.append(new_room)
 

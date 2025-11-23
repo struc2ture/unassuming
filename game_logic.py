@@ -80,8 +80,9 @@ class GameLogic:
 
     def bump(self, entity: Entity, bumped_entity: Entity) -> List[GameEffect]:
         if isinstance(entity, Actor) and isinstance(bumped_entity, Actor):
-            if entity is self.player and not bumped_entity.is_hostile and bumped_entity.dialog:
-                return [StartDialogGameEffect(bumped_entity)]
+            if entity is self.player and not bumped_entity.is_hostile:
+                if bumped_entity.dialog:
+                    return [StartDialogGameEffect(bumped_entity)]
             else:
                 self.attack(entity, bumped_entity)
         return []

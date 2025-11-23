@@ -40,6 +40,8 @@ BULB = Actor.actor_template(
     stats=Stats(15, 15, Dice.from_expr("2d6"), 3)
 )
 
+FOES: List[Actor] = [CRANE, BULB]
+
 class USHER_DIALOG:
     C: List[CharacterLine] = [CharacterLine() for _ in range(50)]
     P: List[PlayerLine] = [PlayerLine() for _ in range(50)]
@@ -76,7 +78,8 @@ A_MEEK_MAN = Actor.actor_template(
     description=textwrap.dedent("""\
         <Description>"""),
     stats=Stats(),
-    is_hostile=False
+    is_hostile=False,
+    dialog=CharacterLine().init("Hi.")
 )
 
 A_LORD = Actor.actor_template(
@@ -86,5 +89,64 @@ A_LORD = Actor.actor_template(
     description=textwrap.dedent("""\
         <Description>"""),
     stats=Stats(),
-    is_hostile=False
+    is_hostile=False,
+    dialog=CharacterLine().init("Eat.")
 )
+
+ILLITERATE = Actor.actor_template(
+    glyph="ö",
+    color=(0, 0, 0),
+    name="An Illiterate",
+    description=textwrap.dedent("""\
+        <Description>"""),
+    stats=Stats(),
+    is_hostile=False,
+    dialog=CharacterLine().init("Hi.")
+)
+
+FOREIGN = Actor.actor_template(
+    glyph="Σ",
+    color=(0, 0, 0),
+    name="A Foreign NPC",
+    description=textwrap.dedent("""\
+        <Description>"""),
+    stats=Stats(),
+    is_hostile=False,
+    dialog=CharacterLine().init("Hi.")
+)
+
+A_DEPOSED_KIND = Actor.actor_template(
+    glyph="Ü",
+    color=(0, 0, 0),
+    name="A Deposed King",
+    description=textwrap.dedent("""\
+        <Description>"""),
+    stats=Stats(),
+    is_hostile=False,
+    dialog=CharacterLine().init("Hi.")
+)
+
+AN_ENVOY = Actor.actor_template(
+    glyph="É",
+    color=(0, 0, 0),
+    name="An Envoy",
+    description=textwrap.dedent("""\
+        <Description>"""),
+    stats=Stats(),
+    is_hostile=False,
+    dialog=CharacterLine().init("Hi.")
+)
+
+A_TRANSLATOR = Actor.actor_template(
+    glyph="τ",
+    color=(0, 0, 0),
+    name="Envoy's Translator",
+    description=textwrap.dedent("""\
+        <Description>"""),
+    stats=Stats(),
+    is_hostile=False,
+    dialog=CharacterLine().init("Hi.")
+)
+
+
+NPCS: List[Actor] = [A_MEEK_MAN, A_LORD, ILLITERATE, FOREIGN, A_DEPOSED_KIND, AN_ENVOY, A_TRANSLATOR]
