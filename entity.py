@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 from dataclasses import dataclass, field
 from enum import auto, Enum
-from typing import Optional, Tuple, Type, TypeVar
+from typing import Optional, Tuple, Type, TypeVar, List
 
 import tcod
 
@@ -105,6 +105,7 @@ class Actor(Entity):
         self.is_hostile: bool = False
         self.dialog: Optional[CharacterLine] = None
         self.is_alive: bool = False
+        self.inventory: List[Item] = []
 
     @staticmethod
     def actor_template(
@@ -117,6 +118,7 @@ class Actor(Entity):
             is_hostile: bool = True,
             dialog: Optional[CharacterLine] = None,
             is_alive: bool = True,
+            inventory: List[Item] | None = None
     ) -> Actor:
         template: Actor = Actor()
         template.init_common(glyph, color, name, description)
@@ -125,21 +127,31 @@ class Actor(Entity):
         template.is_hostile = is_hostile
         template.dialog = dialog
         template.is_alive = is_alive
+        if inventory is not None:
+            template.inventory = inventory
         return template
 
-    def die(self):
+    def die(self) -> None:
         self.is_alive = False
         self.is_blocking = False
 
+    def pickup_item(self, item: Item) -> None:
+        self.inventory.append(item)
+        item.set_in_inventory(self)
+
+    def drop_item(self, item: Item) -> None:
+        self.inventory.remove(item)
+        item.set_in_world(self.x, self.y)
+
     @property
-    def name(self):
+    def name(self) -> str:
         n = self._name
         if not self.is_alive:
             n += " (corpse)"
         return n
 
     @property
-    def glyph(self):
+    def glyph(self) -> str:
         return self._glyph if self.is_alive else REMAINS_GLYPH
 
     @property
@@ -147,5 +159,35 @@ class Actor(Entity):
         return self._color if self.is_alive else REMAINS_COLOR
     
     @property
-    def render_layer(self):
+    def render_layer(self) -> RenderLayer:
         return self._render_layer if self.is_alive else RenderLayer.CORPSE
+
+
+class Item(Entity):
+    def __init__(self):
+        super().__init__()
+
+        self.in_inventory: Actor | None = None
+
+    @staticmethod
+    def item_template(
+            glyph: str,
+            color: Tuple[int, int, int],
+            name: str,
+            description: str
+    ) -> Item:
+        template: Item = Item()
+        template.init_common(glyph, color, name, description)
+        template._render_layer = RenderLayer.ITEM
+        template.is_blocking = False
+        return template
+    
+    def set_in_inventory(self, actor: Actor) -> None:
+        self.in_inventory = actor
+        self.x = 0
+        self.y = 0
+    
+    def set_in_world(self, x: int, y: int) -> None:
+        self.in_inventory = None
+        self.x = x
+        self.y = y

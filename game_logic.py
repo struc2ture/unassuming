@@ -6,7 +6,7 @@ import tcod
 from tile_map import TileMap
 from game_trace import GameTrace
 from game_effect import GameEffect, StartDialogGameEffect
-from entity import Actor, Entity
+from entity import Actor, Entity, Item
 import proc_gen
 import templates
 
@@ -35,12 +35,14 @@ class GameLogic:
 
         self.update_fov()
 
-    def get_entity_at(self, x: int, y: int) -> Optional[Entity]:
+    def get_entities_at(self, x: int, y: int) -> List[Entity]:
+        result = []
         for entity in self.entities:
             if entity.x == x and entity.y == y:
-                return entity
-        return None
-
+                if not isinstance(entity, Item) or not entity.in_inventory:
+                    result.append(entity)
+        return result
+    
     def get_blocking_entity_at(self, x: int, y: int) -> Optional[Entity]:
         for entity in self.entities:
             if entity.x == x and entity.y == y:
@@ -89,6 +91,16 @@ class GameLogic:
 
     def skip_turn(self, entity: Entity) -> None:
         pass
+
+    def pickup_item_below(self, actor: Actor) -> None:
+        for entity in self.get_entities_at(actor.x, actor.y):
+            if isinstance(entity, Item):
+                actor.pickup_item(entity)
+                return
+            
+    def drop_item(self, actor: Actor) -> None:
+        if actor.inventory:
+            actor.drop_item(actor.inventory[0])
 
     def turn_actor_hostile(self, actor: Actor) -> None:
         actor.is_hostile = True

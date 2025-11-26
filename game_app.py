@@ -58,9 +58,9 @@ class GameApp:
                     GameTrace.log.print_last(5)
                     print()
             case tcod.event.MouseButtonDown(button=tcod.event.MouseButton.LEFT, tile=tile):
-                entity = self.game_logic.get_entity_at(int(tile.x), int(tile.y))
+                entity = self.game_logic.get_entities_at(int(tile.x), int(tile.y))
                 if entity:
-                    self.push_state(InspectState(self.game_logic, self, self.main_console, entity))
+                    self.push_state(InspectState(self.game_logic, self, self.main_console, entity[0]))
 
         player_dx = 0
         player_dy = 0
@@ -94,6 +94,15 @@ class GameApp:
                     player_dy =  0
                 case tcod.event.KeyDown(sym=tcod.event.KeySym.S):
                     self.game_logic.skip_turn(self.game_logic.player)
+                    player_passed_turn = True
+
+                case tcod.event.KeyDown(sym=tcod.event.KeySym.G):
+                    self.game_logic.pickup_item_below(self.game_logic.player)
+                    print(", ".join(item.name for item in self.game_logic.player.inventory))
+                    player_passed_turn = True
+
+                case tcod.event.KeyDown(sym=tcod.event.KeySym.V):
+                    self.game_logic.drop_item(self.game_logic.player)
                     player_passed_turn = True
 
             if player_dx != 0 or player_dy != 0:

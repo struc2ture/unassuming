@@ -3,7 +3,7 @@ import textwrap
 
 from dialog import CharacterLine, PlayerLine
 from dice import Dice
-from entity import Entity, Actor, Stats
+from entity import Entity, Actor, Item, Stats
 
 PLAYER = Actor.actor_template(
     glyph="@",
@@ -150,3 +150,24 @@ A_TRANSLATOR = Actor.actor_template(
 
 
 NPCS: List[Actor] = [A_MEEK_MAN, A_LORD, ILLITERATE, FOREIGN, A_DEPOSED_KIND, AN_ENVOY, A_TRANSLATOR]
+
+DAGGER = Item.item_template(
+    glyph="/",
+    color=(0, 191, 255),
+    name="Dagger",
+    description=textwrap.dedent("""\
+        A dull (and uninteresting) dagger you stole off a body in front of the entrance to the cavern.
+        This will have to do, for the lack of better foresight.
+        The dagger was buried deep in the eye of the unlucky victim.
+        With the gruesome image still stuck in your head, your gut tells you the wound was self-inflicted."""),
+)
+
+SWORD = Item.item_template(
+    glyph="/",
+    color=(200, 191, 255),
+    name="Sword",
+    description=textwrap.dedent("""\
+        A shiny steel sword, covered with tiny scratches.
+        Purest iron ore from the mines of Hgilut infused with ivory charcoal. Each sword is thought to have a soul of an elephant.
+        The sword has seen its share of combat and could use some sharpening. But so what? You only have to swing a little harder.""")
+)
