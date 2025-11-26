@@ -144,6 +144,14 @@ class GameLogic:
             actor.equip_item(item)
         return []
 
+    def trade_items(self, actor_a: Actor, actor_b: Actor, item_a: Item, item_b: Item) -> None:
+        actor_a.inventory.remove(item_a)
+        actor_b.inventory.remove(item_b)
+        actor_a.inventory.append(item_b)
+        actor_b.inventory.append(item_a)
+        item_a.set_in_inventory(actor_b)
+        item_b.set_in_inventory(actor_a)
+
     def get_path_to(self, entity: Entity, dest_x: int, dest_y: int) -> List[Tuple[int, int]]:
         cost = np.array(self.tile_map.tiles["walkable"], dtype=np.int8)
 

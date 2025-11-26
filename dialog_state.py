@@ -10,6 +10,7 @@ from dialog import CharacterLine, PlayerLine
 from entity import Actor
 from game_state import GameState
 from game_logic import GameLogic
+from trading_state import TradingState
 
 if TYPE_CHECKING:
     from game_app import GameApp
@@ -24,19 +25,26 @@ class DialogState(GameState):
         self.width: int = 30
         self.height: int = 40
         self.this_console = tcod.console.Console(self.width, self.height)
+        self.parent_console = parent_console
         self.anchor: Tuple[int, int] = (parent_console.width, 0)
         self.offset: Tuple[int, int] = (-self.width - 6, (parent_console.height - self.height) // 2)
         self.with_actor: Actor = with_actor
         self.set_character_line(self.with_actor.dialog)
+        self.selected_choice = -1
 
     def set_character_line(self, character_line: CharacterLine | None):
         if character_line:
             self.dialog_text = character_line.text
             self.pending_action = character_line.action
-            if character_line.next_line:
+            if character_line.responses:
+                self.options = []
+                for player_line in character_line.responses:
+                    if player_line.text == "<Continue>":
+                        self.options.append((player_line.text, character_line.next_line))
+                    else:
+                        self.options.append((player_line.text, player_line.character_line))
+            elif character_line.next_line:
                 self.options = [("<Continue>", character_line.next_line)]
-            elif character_line.responses:
-                self.options = [(player_line.text, player_line.character_line) for player_line in character_line.responses]
             else:
                 self.options = [("<Quit>", None)]
         else:
@@ -100,29 +108,36 @@ class DialogState(GameState):
         self.this_console.blit(parent_console, self.anchor[0] + self.offset[0], self.anchor[1] + self.offset[1], bg_alpha=0.9)
 
     def handle_event(self, context: tcod.context.Context, event: tcod.event.Event) -> None:
-        selected_choice = -1
         match event:
             case tcod.event.KeyDown(sym=tcod.event.KeySym.N1):
-                selected_choice = 0
+                self.selected_choice = 0
             case tcod.event.KeyDown(sym=tcod.event.KeySym.N2):
-                selected_choice = 1
+                self.selected_choice = 1
             case tcod.event.KeyDown(sym=tcod.event.KeySym.N3):
-                selected_choice = 2
+                self.selected_choice = 2
             case tcod.event.KeyDown(sym=tcod.event.KeySym.N4):
-                selected_choice = 3
+                self.selected_choice = 3
             case tcod.event.KeyDown(sym=tcod.event.KeySym.N5):
-                selected_choice = 4
+                self.selected_choice = 4
             case tcod.event.KeyDown(sym=tcod.event.KeySym.N6):
-                selected_choice = 5
+                self.selected_choice = 5
             case tcod.event.KeyDown(sym=tcod.event.KeySym.N7):
-                selected_choice = 6
+                self.selected_choice = 6
             case tcod.event.KeyDown(sym=tcod.event.KeySym.N8):
-                selected_choice = 7
+                self.selected_choice = 7
 
-        if 0 <= selected_choice < len(self.options):
-            if self.pending_action == "turn_hostile":
-                self.game_logic.turn_actor_hostile(self.with_actor)
-            if self.options[selected_choice][1]:
-                self.set_character_line(self.options[selected_choice][1])
+        if 0 <= self.selected_choice < len(self.options):
+            match self.pending_action:
+                case "turn_hostile":
+                    self.game_logic.turn_actor_hostile(self.with_actor)
+                    self.pending_action = None
+                case "start_trade":
+                    self.game_app.push_state(TradingState(self.game_logic, self.game_app, self.parent_console, self.game_logic.player, self.with_actor))
+                    self.pending_action = None
+                    return
+
+            if self.options[self.selected_choice][1]:
+                self.set_character_line(self.options[self.selected_choice][1])
+                self.selected_choice = -1
             else:
                 self.game_app.pop_state()

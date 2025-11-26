@@ -6,6 +6,66 @@ from dice import Dice
 from entity import Entity, Actor, Stats
 from entity import Item, ItemEquippable, EquipSlot
 
+### ITEMS ###
+
+DAGGER = Item.item_template(
+    glyph="/",
+    color=(0, 191, 255),
+    name="Dagger",
+    description=textwrap.dedent("""\
+        A dull (and uninteresting) dagger you stole off a body in front of the entrance to the cavern.
+        This will have to do, for the lack of better foresight.
+        The dagger was buried deep in the eye of the unlucky victim.
+        With the gruesome image still stuck in your head, your gut tells you the wound was self-inflicted."""),
+    equippable=ItemEquippable(EquipSlot.WEAPON, modified_attack=Dice.from_expr("1d6"))
+)
+
+SWORD = Item.item_template(
+    glyph="/",
+    color=(200, 191, 255),
+    name="Sword",
+    description=textwrap.dedent("""\
+        A shiny steel sword, covered with tiny scratches.
+        Purest iron ore from the mines of Hgilut infused with ivory charcoal. Each sword is thought to have a soul of an elephant.
+        The sword has seen its share of combat and could use some sharpening. But so what? You only have to swing a little harder."""),
+    equippable=ItemEquippable(EquipSlot.WEAPON, modified_attack=Dice.from_expr("2d6"))
+)
+
+A_TRINKET = Item.item_template(
+    glyph="♦︎",
+    color=(100, 100, 255),
+    name="A Trinket",
+    description=textwrap.dedent("""\
+        A little trinket to add some bulk to your pouch.
+        As the saying goes, 'False prophets wear empty pockets.'
+        """),
+)
+
+A_MAP = Item.item_template(
+    glyph="#",
+    color=(255, 100, 100),
+    name="A Map",
+    description=textwrap.dedent("""\
+        It would make sense for this to be a map of the dungeon, but...
+        the surroundings don't add up...
+        and there are destinations seemingly unreachable...
+        At the bottom there's a scribble: 'Township of Sarotesh.'
+        Do you find that interesting?"""),
+)
+
+LEATHER_ARMOR = Item.item_template(
+    glyph="[",
+    color=(139, 69, 19),
+    name="Leather Armor",
+    description=textwrap.dedent("""\
+        A traditional Neeman-style leather armor: panels of boarhide, boiled in pig's blood and stitched to a tough canvas base, the kind of cloth used to keep grain from spilling.
+        Many can't tolerate the smell, but you came to enjoy it, although you would not admit it to a fellow traveler sharing a campfire.
+        """),
+    equippable=ItemEquippable(EquipSlot.CHEST, modified_defense=3),
+)
+
+### ACTORS: PLAYER ###
+
 PLAYER = Actor.actor_template(
     glyph="@",
     color=(255, 255, 255),
@@ -17,6 +77,8 @@ PLAYER = Actor.actor_template(
         And what is your name? Did you forget again? I'm weary of reminding you."""),
     stats=Stats(10, 10, Dice.from_expr("1d4"), 1)
 )
+
+### ACTORS: FOES ###
 
 CRANE = Actor.actor_template(
     glyph="c",
@@ -43,18 +105,31 @@ BULB = Actor.actor_template(
 
 FOES: List[Actor] = [CRANE, BULB]
 
+### ACTORS: NPCS ###
+
 class USHER_DIALOG:
     C: List[CharacterLine] = [CharacterLine() for _ in range(50)]
     P: List[PlayerLine] = [PlayerLine() for _ in range(50)]
 
-    C[0].init("Ah! A new visitor! My dearest of guests, I hope you enjoy your stay at this unassuming cavern that I happen to call my home.", [], C[1])
-    C[1].init("There is someone for everyone here!", [], C[2])
-    C[2].init("Looking for gold? You will find plenty of it here.", [], C[3])
-    C[3].init("Looking for riches? I already mentioned the gold! But this dungeon is a place of business too! - A perfect investment opportunity!", [], C[4])
-    C[4].init("Looking for fame? This is the place where LEGENDS are born. And MYTHS are disseminated. And now you are PART OF IT.", [], C[5])
-    C[5].init("You've heard of the dangers this place entombs, but you are tough, you are a hero! Those stories are all written for someone else!", [], C[6])
-    C[6].init("Don't bother turning around and looking for the exit... A completely natural and non-magical landslide oh so conveniently sealed the door behind you. I guess you will just have to stay and explore a little bit!", [], C[7])
+    C[0].init("Ahhh! A new visitor! My dearest of guests, I hope you enjoy your stay at this unassuming cavern that I happen to call my home.", [P[0], P[1], P[2]], C[1])
+    C[1].init("There is someone for everyone here!", [P[0], P[1], P[2]], C[2])
+    C[2].init("Looking for gold? You will find plenty of it here.", [P[0], P[1], P[2]], C[3])
+    C[3].init("Looking for riches? I already mentioned the gold! But this dungeon is a place of business too! - A perfect investment opportunity!", [P[0], P[1], P[2]], C[4])
+    C[4].init("Looking for fame? This is the place where LEGENDS are born. And MYTHS are disseminated. And now you are PART OF IT.", [P[0], P[1], P[2]], C[5])
+    C[5].init("You've heard of the dangers this place entombs, but you are tough, you are a hero! Those stories are all written for someone else!", [P[0], P[1], P[2]], C[6])
+    C[6].init("Don't bother turning around and looking for the exit... A completely natural and non-magical landslide oh so conveniently sealed the door behind you. I guess you will just have to stay and explore a little bit!", [P[0], P[1], P[2]], C[7])
     C[7].init("Not to worry! I am here to soften the blows and harden the steel!")
+
+    P[0].init("<Continue>", C[1])
+    P[1].init("STOP your ranting! I'm in dire need of EXCHANGE of EQUIVALENCES!!!", C[8])
+
+    C[8].init("Ahhh... A fellow with pockets and hands... Let's see what we can work out...", [], C[9], "start_trade")
+    C[9].init("Your pleasure.")
+
+    P[2].init("You are a crazy old man!!!", C[10])
+
+    C[10].init("I see you've had enough of my pleasantries...", [], C[11])
+    C[11].init("Well then, I guess, the ice of steel and fire of blood is pleasant too. In their own way.", [], None, "turn_hostile")
 
     start = C[0]
 
@@ -69,7 +144,11 @@ USHER = Actor.actor_template(
         The shine of the precious stone - diamond? - on the man's neck fills you with respect for the man, and a craving to apropriate the said respect for yourself."""),
     stats=Stats(20, 20, Dice.from_expr("2d10"), 3),
     is_hostile=False,
-    dialog=USHER_DIALOG.start
+    dialog=USHER_DIALOG.start,
+    # TODO(A): I should really double check this type of logic.
+    #          But I think it should work: when the parent entity (the NPC) gets spawned,
+    #          it's deep copied from the template, which should include a deep copy of each item in the inventory.
+    inventory=[A_MAP]
 )
 
 A_MEEK_MAN = Actor.actor_template(
@@ -152,46 +231,3 @@ A_TRANSLATOR = Actor.actor_template(
 
 NPCS: List[Actor] = [A_MEEK_MAN, A_LORD, ILLITERATE, FOREIGN, A_DEPOSED_KIND, AN_ENVOY, A_TRANSLATOR]
 
-DAGGER = Item.item_template(
-    glyph="/",
-    color=(0, 191, 255),
-    name="Dagger",
-    description=textwrap.dedent("""\
-        A dull (and uninteresting) dagger you stole off a body in front of the entrance to the cavern.
-        This will have to do, for the lack of better foresight.
-        The dagger was buried deep in the eye of the unlucky victim.
-        With the gruesome image still stuck in your head, your gut tells you the wound was self-inflicted."""),
-    equippable=ItemEquippable(EquipSlot.WEAPON, modified_attack=Dice.from_expr("1d6"))
-)
-
-SWORD = Item.item_template(
-    glyph="/",
-    color=(200, 191, 255),
-    name="Sword",
-    description=textwrap.dedent("""\
-        A shiny steel sword, covered with tiny scratches.
-        Purest iron ore from the mines of Hgilut infused with ivory charcoal. Each sword is thought to have a soul of an elephant.
-        The sword has seen its share of combat and could use some sharpening. But so what? You only have to swing a little harder."""),
-    equippable=ItemEquippable(EquipSlot.WEAPON, modified_attack=Dice.from_expr("2d6"))
-)
-
-A_TRINKET = Item.item_template(
-    glyph="♦︎",
-    color=(100, 100, 255),
-    name="A Trinket",
-    description=textwrap.dedent("""\
-        A little trinket to add some bulk to your pouch.
-        As the saying goes, 'False prophets wear empty pockets.'
-        """),
-)
-
-LEATHER_ARMOR = Item.item_template(
-    glyph="[",
-    color=(139, 69, 19),
-    name="Leather Armor",
-    description=textwrap.dedent("""\
-        A traditional Neeman-style leather armor: panels of boarhide, boiled in pig's blood and stitched to a tough canvas base, the kind of cloth used to keep grain from spilling.
-        Many can't tolerate the smell, but you came to enjoy it, although you would not admit it to a fellow traveler sharing a campfire.
-        """),
-    equippable=ItemEquippable(EquipSlot.CHEST, modified_defense=3),
-)

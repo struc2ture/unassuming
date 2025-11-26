@@ -150,5 +150,6 @@ def generate_map(
     entities.append(templates.SWORD.spawn(rooms[0].center[0] - 1, rooms[0].center[1]))
     entities.append(templates.LEATHER_ARMOR.spawn(rooms[0].center[0] - 2, rooms[0].center[1]))
     entities.append(templates.A_TRINKET.spawn(rooms[0].center[0] + 1, rooms[0].center[1]))
+    entities.append(templates.A_MAP.spawn(rooms[0].center[0] + 2, rooms[0].center[1]))
 
     return map
