@@ -97,6 +97,15 @@ class Stats:
 REMAINS_GLYPH = "%"
 REMAINS_COLOR = (150, 30, 30)
 
+
+@dataclass
+class Equipment:
+    weapon: Item | None = None
+    chest: Item | None = None
+    legs: Item | None = None
+    arms: Item | None = None
+
+
 class Actor(Entity):
     def __init__(self):
         super().__init__()
@@ -106,6 +115,7 @@ class Actor(Entity):
         self.dialog: Optional[CharacterLine] = None
         self.is_alive: bool = False
         self.inventory: List[Item] = []
+        self.equipment: Equipment = Equipment()
 
     @staticmethod
     def actor_template(
@@ -118,7 +128,8 @@ class Actor(Entity):
             is_hostile: bool = True,
             dialog: Optional[CharacterLine] = None,
             is_alive: bool = True,
-            inventory: List[Item] | None = None
+            inventory: List[Item] | None = None,
+            equipment: Equipment | None = None
     ) -> Actor:
         template: Actor = Actor()
         template.init_common(glyph, color, name, description)
@@ -127,8 +138,11 @@ class Actor(Entity):
         template.is_hostile = is_hostile
         template.dialog = dialog
         template.is_alive = is_alive
+        # TODO(A): Is 'is not None' right?
         if inventory is not None:
             template.inventory = inventory
+        if equipment is not None:
+            template.equipment = equipment
         return template
 
     def die(self) -> None:
@@ -142,6 +156,32 @@ class Actor(Entity):
     def drop_item(self, item: Item) -> None:
         self.inventory.remove(item)
         item.set_in_world(self.x, self.y)
+
+    def equip_item(self, item: Item) -> None:
+        if item.equipppable:
+            # unequipped_item = None
+            match item.equipppable.equip_slot:
+                case EquipSlot.WEAPON:
+                    # unequipped_item = self.equipment.weapon
+                    self.equipment.weapon = item
+                case EquipSlot.CHEST:
+                    # unequipped_item = self.equipment.chest
+                    self.equipment.chest = item
+                case EquipSlot.LEGS:
+                    # unequipped_item = self.equipment.legs
+                    self.equipment.legs = item
+                case EquipSlot.ARMS:
+                    # unequipped_item = self.equipment.arms
+                    self.equipment.arms = item
+
+    def is_item_equppied(self, item: Item) -> bool:
+        if item.equipppable: 
+                return (self.equipment.weapon == item or
+                    self.equipment.chest == item or
+                    self.equipment.arms == item or
+                    self.equipment.legs == item)
+        else:
+            return False
 
     @property
     def name(self) -> str:
@@ -163,9 +203,27 @@ class Actor(Entity):
         return self._render_layer if self.is_alive else RenderLayer.CORPSE
 
 
+class EquipSlot(Enum):
+    WEAPON = auto()
+    CHEST = auto()
+    LEGS = auto()
+    ARMS = auto()
+
+    def __str__(self):
+        match self:
+            case EquipSlot.WEAPON:
+                return "weapon"
+            case EquipSlot.CHEST:
+                return "chest"
+            case EquipSlot.LEGS:
+                return "legs"
+            case EquipSlot.ARMS:
+                return "arms"
+
+
 @dataclass
 class ItemEquippable:
-    #TODO(A): Equipment slot
+    equip_slot: EquipSlot
     modified_attack: Dice | None = None
     modified_defense: int | None = None
 

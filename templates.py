@@ -4,7 +4,7 @@ import textwrap
 from dialog import CharacterLine, PlayerLine
 from dice import Dice
 from entity import Entity, Actor, Stats
-from entity import Item, ItemEquippable
+from entity import Item, ItemEquippable, EquipSlot
 
 PLAYER = Actor.actor_template(
     glyph="@",
@@ -161,7 +161,7 @@ DAGGER = Item.item_template(
         This will have to do, for the lack of better foresight.
         The dagger was buried deep in the eye of the unlucky victim.
         With the gruesome image still stuck in your head, your gut tells you the wound was self-inflicted."""),
-    equippable=ItemEquippable(modified_attack=Dice.from_expr("1d6"))
+    equippable=ItemEquippable(EquipSlot.WEAPON, modified_attack=Dice.from_expr("1d6"))
 )
 
 SWORD = Item.item_template(
@@ -172,7 +172,7 @@ SWORD = Item.item_template(
         A shiny steel sword, covered with tiny scratches.
         Purest iron ore from the mines of Hgilut infused with ivory charcoal. Each sword is thought to have a soul of an elephant.
         The sword has seen its share of combat and could use some sharpening. But so what? You only have to swing a little harder."""),
-    equippable=ItemEquippable(modified_attack=Dice.from_expr("1d8"))
+    equippable=ItemEquippable(EquipSlot.WEAPON, modified_attack=Dice.from_expr("1d8"))
 )
 
 A_TRINKET = Item.item_template(

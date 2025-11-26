@@ -49,10 +49,11 @@ class InventoryState(GameState):
             index = 0
             for item in self.items:
                 index_str = f"({index + 1}) "
+                equipped_str = f" ({str(item.equipppable.equip_slot)})" if item.equipppable and self.for_actor.is_item_equppied(item) else ""
                 self.this_console.print(
                     cursor_x,
                     cursor_y,
-                    text=f"{index_str}  {item.name}",
+                    text=f"{index_str}  {item.name}{equipped_str}",
                     fg=(0, 0, 0) if self.selected_index == index else (255, 255, 255),
                     bg=(255, 255, 255) if self.selected_index == index else (0, 0, 0)
                 )

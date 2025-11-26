@@ -66,11 +66,10 @@ class GameLogic:
 
         had_weapon = False
         attack_dice = attacker.stats.attack
-        for item in attacker.inventory:
-            if item.equipppable and item.equipppable.modified_attack:
-                attack_dice = item.equipppable.modified_attack
-                entry.add_item(f"attacker weapon: {item.name}; modified_attack: {item.equipppable.modified_attack}")
-                had_weapon = True
+        if attacker.equipment.weapon and attacker.equipment.weapon.equipppable and attacker.equipment.weapon.equipppable.modified_attack:
+            attack_dice = attacker.equipment.weapon.equipppable.modified_attack
+            entry.add_item(f"attacker weapon: {attacker.equipment.weapon.name}; modified_attack: {attacker.equipment.weapon.equipppable.modified_attack}")
+            had_weapon = True
 
         if not had_weapon:
                 entry.add_item(f"attacker weapon: none; base attack: {attack_dice}")
@@ -137,7 +136,7 @@ class GameLogic:
 
     def use_item(self, actor: Actor, item: Item) -> list[GameEffect]:
         if item.equipppable:
-            print(f"{actor.name} equipping {item.name}")
+            actor.equip_item(item)
         return []
 
     def get_path_to(self, entity: Entity, dest_x: int, dest_y: int) -> List[Tuple[int, int]]:
