@@ -172,7 +172,7 @@ SWORD = Item.item_template(
         A shiny steel sword, covered with tiny scratches.
         Purest iron ore from the mines of Hgilut infused with ivory charcoal. Each sword is thought to have a soul of an elephant.
         The sword has seen its share of combat and could use some sharpening. But so what? You only have to swing a little harder."""),
-    equippable=ItemEquippable(EquipSlot.WEAPON, modified_attack=Dice.from_expr("1d8"))
+    equippable=ItemEquippable(EquipSlot.WEAPON, modified_attack=Dice.from_expr("2d6"))
 )
 
 A_TRINKET = Item.item_template(
@@ -183,4 +183,15 @@ A_TRINKET = Item.item_template(
         A little trinket to add some bulk to your pouch.
         As the saying goes, 'False prophets wear empty pockets.'
         """),
+)
+
+LEATHER_ARMOR = Item.item_template(
+    glyph="[",
+    color=(139, 69, 19),
+    name="Leather Armor",
+    description=textwrap.dedent("""\
+        A traditional Neeman-style leather armor: panels of boarhide, boiled in pig's blood and stitched to a tough canvas base, the kind of cloth used to keep grain from spilling.
+        Many can't tolerate the smell, but you came to enjoy it, although you would not admit it to a fellow traveler sharing a campfire.
+        """),
+    equippable=ItemEquippable(EquipSlot.CHEST, modified_defense=3),
 )
