@@ -8,6 +8,7 @@ from tcod.event import Event
 from entity import Actor, Item
 from game_state import GameState
 from game_logic import GameLogic
+from inspect_state import InspectState
 
 if TYPE_CHECKING:
     from game_app import GameApp
@@ -19,6 +20,7 @@ class InventoryState(GameState):
         self.width: int = 30
         self.height: int = 40
         self.this_console: tcod.console.Console = tcod.console.Console(self.width, self.height)
+        self.parent_console: tcod.console.Console = parent_console
         self.anchor: tuple[int, int] = (parent_console.width, 0)
         self.offset: tuple[int, int] = (-self.width - 6, (parent_console.height - self.height) // 2)
         self.for_actor: Actor = for_actor
@@ -86,5 +88,7 @@ class InventoryState(GameState):
                 self.selected_index -= 1
                 if self.selected_index < 0:
                     self.selected_index = len(self.items) - 1
-            case tcod.event.KeyDown(sym=tcod.event.KeySym.RETURN):
+            case tcod.event.KeyDown(sym=tcod.event.KeySym.E):
                 self.game_logic.use_item(self.for_actor, self.items[self.selected_index])
+            case tcod.event.KeyDown(sym=tcod.event.KeySym.RETURN):
+                self.game_app.push_state(InspectState(self.game_logic, self.game_app, self.parent_console, self.items[self.selected_index]))

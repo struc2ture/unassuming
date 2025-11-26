@@ -64,22 +64,18 @@ class GameLogic:
         entry.add_item(f"attacker: {attacker.name} ({attacker.stats.hp}/{attacker.stats.max_hp} HP)")
         entry.add_item(f"defender: {defender.name} ({defender.stats.hp}/{defender.stats.max_hp} HP)")
 
-        had_weapon = False
         modified_attack_dice = attacker.stats.attack
         if attacker.equipment.weapon and attacker.equipment.weapon.equipppable and attacker.equipment.weapon.equipppable.modified_attack:
             modified_attack_dice = attacker.equipment.weapon.equipppable.modified_attack
             entry.add_item(f"attacker_weapon: {attacker.equipment.weapon.name}; modified_attack: {attacker.equipment.weapon.equipppable.modified_attack}")
-            had_weapon = True
-        if not had_weapon:
+        else:
             entry.add_item(f"attacker_weapon: none; base_attack: {modified_attack_dice}")
 
-        had_armor = False
         modified_defense = defender.stats.defense
         if defender.equipment.chest and defender.equipment.chest.equipppable and defender.equipment.chest.equipppable.modified_defense:
             modified_defense = defender.equipment.chest.equipppable.modified_defense
             entry.add_item(f"defender_chest_piece: {defender.equipment.chest.name}; modified_defense: {defender.equipment.chest.equipppable.modified_defense}")
-            had_armor = True
-        if not had_armor:
+        else:
             entry.add_item(f"defender_chest_piece: none; base_defense: {modified_defense}")
 
         attack_roll = modified_attack_dice.roll()

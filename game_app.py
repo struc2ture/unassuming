@@ -1,7 +1,6 @@
 
 import datetime
 import os
-from typing import List, Optional
 
 import tcod
 
@@ -19,12 +18,12 @@ class GameApp:
     game_turn: int
     game_logic: GameLogic
     actor_controller: ActorController
-    current_state: Optional[GameState]
+    state_stack: list[GameState]
     main_console: tcod.console.Console
 
     def __init__(self, map_width: int, map_height: int, main_console: tcod.console.Console):
         self.main_console = main_console
-        self.current_state = None
+        self.state_stack = []
         self.game_turn = 0
 
         self.game_logic = GameLogic(map_width, map_height)
@@ -41,13 +40,13 @@ class GameApp:
             case tcod.event.Quit():
                 raise SystemExit
             case tcod.event.KeyDown(sym=tcod.event.KeySym.ESCAPE):
-                if self.current_state:
-                    self.current_state = None
+                if self.state_stack:
+                    self.pop_state()
                 else:
                     raise SystemExit
 
-        if self.current_state:
-            self.current_state.handle_event(context, event)
+        if self.state_stack:
+            self.state_stack[-1].handle_event(context, event)
             return
 
         match event:
@@ -127,10 +126,10 @@ class GameApp:
                 GameTrace.add_tick(self.game_turn)
 
     def pop_state(self):
-        self.current_state = None
+        self.state_stack.pop()
 
     def push_state(self, state: GameState):
-        self.current_state = state
+        self.state_stack.append(state)
 
     def draw(self, console: tcod.console.Console) -> None:
         self.game_logic.tile_map.draw(console)
@@ -141,8 +140,8 @@ class GameApp:
             if self.game_logic.tile_map.pos_visible(*entity.pos):
                 entity.draw(console)
 
-        if self.current_state:
-            self.current_state.render(console)
+        for state in self.state_stack:
+            state.render(console)
 
 def dump_game_trace_to_file():
     if not os.path.exists("log"):
