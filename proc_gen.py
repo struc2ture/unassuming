@@ -148,5 +148,6 @@ def generate_map(
 
     entities.append(templates.DAGGER.spawn(rooms[0].center[0], rooms[0].center[1] - 1))
     entities.append(templates.SWORD.spawn(rooms[0].center[0] - 1, rooms[0].center[1]))
+    entities.append(templates.A_TRINKET.spawn(rooms[0].center[0] + 1, rooms[0].center[1]))
 
     return map

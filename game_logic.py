@@ -64,8 +64,19 @@ class GameLogic:
         entry.add_item(f"attacker: {attacker.name} ({attacker.stats.hp}/{attacker.stats.max_hp} HP)")
         entry.add_item(f"defender: {defender.name} ({defender.stats.hp}/{defender.stats.max_hp} HP)")
 
-        attack_roll = attacker.stats.attack.roll()
-        entry.add_item(f"attack_roll: {attacker.stats.attack} -> {attack_roll}")
+        had_weapon = False
+        attack_dice = attacker.stats.attack
+        for item in attacker.inventory:
+            if item.equipppable and item.equipppable.modified_attack:
+                attack_dice = item.equipppable.modified_attack
+                entry.add_item(f"attacker weapon: {item.name}; modified_attack: {item.equipppable.modified_attack}")
+                had_weapon = True
+
+        if not had_weapon:
+                entry.add_item(f"attacker weapon: none; base attack: {attack_dice}")
+
+        attack_roll = attack_dice.roll()
+        entry.add_item(f"attack_roll: {attack_dice} -> {attack_roll}")
         entry.add_item(f"defense: {defender.stats.defense}")
 
         damage = min(max(attack_roll - defender.stats.defense, 0), defender.stats.hp)

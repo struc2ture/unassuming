@@ -163,23 +163,42 @@ class Actor(Entity):
         return self._render_layer if self.is_alive else RenderLayer.CORPSE
 
 
+@dataclass
+class ItemEquippable:
+    #TODO(A): Equipment slot
+    modified_attack: Dice | None = None
+    modified_defense: int | None = None
+
+
+class ItemUsable:
+    # NOTE(A): TBD
+    pass
+
+
 class Item(Entity):
     def __init__(self):
         super().__init__()
 
         self.in_inventory: Actor | None = None
+        self.equipppable: ItemEquippable | None = None
+        self.usable: ItemUsable | None = None
 
     @staticmethod
     def item_template(
             glyph: str,
             color: Tuple[int, int, int],
             name: str,
-            description: str
+            description: str,
+            *,
+            equippable: ItemEquippable | None = None,
+            usable: ItemUsable | None = None
     ) -> Item:
         template: Item = Item()
         template.init_common(glyph, color, name, description)
         template._render_layer = RenderLayer.ITEM
         template.is_blocking = False
+        template.equipppable = equippable
+        template.usable = usable
         return template
     
     def set_in_inventory(self, actor: Actor) -> None:
