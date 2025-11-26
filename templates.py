@@ -60,7 +60,7 @@ class USHER_DIALOG:
 
 USHER = Actor.actor_template(
     glyph="U",
-    color=(130, 200, 130),
+    color=(50, 80, 50),
     name="Usher",
     description=textwrap.dedent("""\
         This man looks suspiciously friendly for the kind of place you both find yourself in.

@@ -135,6 +135,11 @@ class GameLogic:
         else:
             self.move(entity, x, y)
 
+    def use_item(self, actor: Actor, item: Item) -> list[GameEffect]:
+        if item.equipppable:
+            print(f"{actor.name} equipping {item.name}")
+        return []
+
     def get_path_to(self, entity: Entity, dest_x: int, dest_y: int) -> List[Tuple[int, int]]:
         cost = np.array(self.tile_map.tiles["walkable"], dtype=np.int8)
 

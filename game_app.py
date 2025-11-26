@@ -12,6 +12,7 @@ from game_logic import GameLogic
 from game_trace import GameTrace
 from game_state import GameState
 from inspect_state import InspectState
+from inventory_state import InventoryState
 from dialog_state import DialogState
 
 class GameApp:
@@ -104,6 +105,9 @@ class GameApp:
                 case tcod.event.KeyDown(sym=tcod.event.KeySym.V):
                     self.game_logic.drop_item(self.game_logic.player)
                     player_passed_turn = True
+
+                case tcod.event.KeyDown(sym=tcod.event.KeySym.I):
+                    self.push_state(InventoryState(self.game_logic, self, self.main_console, self.game_logic.player))
 
             if player_dx != 0 or player_dy != 0:
                 effects = self.game_logic.player_move_or_bump(self.game_logic.player, player_dx, player_dy)
