@@ -5,14 +5,15 @@ import os
 import tcod
 
 from actor_controller import ActorController
+from dialog_state import DialogState
 from entity import Actor
 from game_effect import *
 from game_logic import GameLogic
 from game_trace import GameTrace
 from game_state import GameState
+from hud import Hud
 from inspect_state import InspectState
 from inventory_state import InventoryState
-from dialog_state import DialogState
 from in_game_log import InGameLog
 
 class GameApp:
@@ -21,7 +22,7 @@ class GameApp:
     actor_controller: ActorController
     state_stack: list[GameState]
     main_console: tcod.console.Console
-    DEBUG_disable_in_game_log: bool
+    hud: Hud
 
     def __init__(self, map_width: int, map_height: int, main_console: tcod.console.Console):
         self.main_console = main_console
@@ -38,8 +39,8 @@ class GameApp:
         GameTrace.add_game_start()
         GameTrace.add_tick(self.game_turn)
 
-        self.game_logic.tile_map.DEBUG_toggle_ignore_fov()
-        self.DEBUG_disable_in_game_log = False
+        # self.game_logic.tile_map.DEBUG_toggle_ignore_fov()
+        self.hud = Hud(0, self.main_console.height - 6, self.main_console.width, 6, self.game_logic)
 
     def handle_event(self, context: tcod.context.Context, event: tcod.event.Event) -> None:
         context.convert_event(event)  # Adds tile coordinates to mouse events.
@@ -67,7 +68,7 @@ class GameApp:
             case tcod.event.KeyDown(sym=tcod.event.KeySym.F2):
                 self.game_logic.tile_map.DEBUG_toggle_ignore_fov()
             case tcod.event.KeyDown(sym=tcod.event.KeySym.F3):
-                self.DEBUG_disable_in_game_log = not self.DEBUG_disable_in_game_log
+                self.hud.DEBUG_toggle_hud()
             case tcod.event.MouseButtonDown(button=tcod.event.MouseButton.LEFT, tile=tile):
                 entity = self.game_logic.get_entities_at(int(tile.x), int(tile.y))
                 if entity:
@@ -141,26 +142,6 @@ class GameApp:
     def push_state(self, state: GameState):
         self.state_stack.append(state)
 
-    # TODO(A): Shouldn't be here
-    def draw_in_game_log(self, console: tcod.console.Console) -> None:
-        console.draw_frame(
-            0,
-            console.height - 5,
-            console.width,
-            5,
-            decoration="         ",
-            bg=(0, 0, 0)
-        )
-        cursor_x = 0
-        cursor_y = console.height - 5
-        for message in InGameLog.log.messages[-5:]:
-            console.print(
-                cursor_x,
-                cursor_y,
-                text=message,
-            )
-            cursor_y += 1
-
     def draw(self, console: tcod.console.Console) -> None:
         self.game_logic.tile_map.draw(console)
 
@@ -171,8 +152,7 @@ class GameApp:
             if self.game_logic.tile_map.pos_visible(*entity.pos):
                 entity.draw(console)
 
-        if not self.DEBUG_disable_in_game_log:
-            self.draw_in_game_log(console)
+        self.hud.draw_hud(console)
 
         for state in self.state_stack:
             state.render(console)
