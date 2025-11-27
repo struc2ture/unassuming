@@ -68,7 +68,7 @@ class Entity:
         spawned_entity.set_pos(x, y)
         spawned_entity.copy_source = self
         return spawned_entity
-
+    
     @property
     def pos(self) -> Tuple[int, int]:
         return self.x, self.y
@@ -104,6 +104,18 @@ class Equipment:
     chest: Item | None = None
     legs: Item | None = None
     arms: Item | None = None
+
+    def get_modified_attack(self) -> Dice | None:
+        if self.weapon and self.weapon.equipppable and self.weapon.equipppable.modified_attack:
+            return self.weapon.equipppable.modified_attack
+        else:
+            return None
+        
+    def get_modified_defense(self) -> int | None:
+        if self.chest and self.chest.equipppable and self.chest.equipppable.modified_defense:
+            return self.chest.equipppable.modified_defense
+        else:
+            return None
 
 
 class Actor(Entity):
@@ -183,6 +195,16 @@ class Actor(Entity):
         else:
             return False
 
+    def get_modified_stats(self) -> Stats:
+        modified_stats = Stats()
+        modified_stats.hp = self.stats.hp
+        modified_stats.max_hp = self.stats.max_hp
+        modified_attack = self.equipment.get_modified_attack()
+        modified_stats.attack = modified_attack if modified_attack else self.stats.attack
+        modified_defense = self.equipment.get_modified_defense()
+        modified_stats.defense = modified_defense if modified_defense else self.stats.defense
+        return modified_stats
+
     @property
     def name(self) -> str:
         n = self._name
@@ -259,6 +281,18 @@ class Item(Entity):
         template.usable = usable
         return template
     
+    def get_modified_attack(self) -> Dice | None:
+        if self.equipppable and self.equipppable.modified_attack:
+            return self.equipppable.modified_attack
+        else:
+            return None
+        
+    def get_modified_defense(self) -> int | None:
+        if self.equipppable and self.equipppable.modified_defense:
+            return self.equipppable.modified_defense
+        else:
+            return None
+
     def set_in_inventory(self, actor: Actor) -> None:
         self.in_inventory = actor
         self.x = 0

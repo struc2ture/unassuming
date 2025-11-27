@@ -137,8 +137,9 @@ def generate_map(
         if len(rooms) > 0: # skip the first room
             for x, y in tunnel_between(rooms[-1].center, new_room.center):
                 map.tiles[x, y] = tile_types.floor
-            place_hostile = random.randint(0, 1) == 0
-            place_room_entities(new_room, entities, spec.max_monsters_per_room, place_hostile)
+            if len(rooms) > 2: # the first three rooms are for testing
+                place_hostile = random.randint(0, 1) == 0
+                place_room_entities(new_room, entities, spec.max_monsters_per_room, place_hostile)
 
         rooms.append(new_room)
 
@@ -151,5 +152,8 @@ def generate_map(
     entities.append(templates.LEATHER_ARMOR.spawn(rooms[0].center[0] - 2, rooms[0].center[1]))
     entities.append(templates.A_TRINKET.spawn(rooms[0].center[0] + 1, rooms[0].center[1]))
     entities.append(templates.A_MAP.spawn(rooms[0].center[0] + 2, rooms[0].center[1]))
+
+    entities.append(templates.CRANE.spawn(rooms[1].center[0], rooms[1].center[1]))
+    entities.append(templates.BULB.spawn(rooms[2].center[0], rooms[2 ].center[1]))
 
     return map

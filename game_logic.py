@@ -64,26 +64,21 @@ class GameLogic:
         entry.add_item(f"attacker: {attacker.name} ({attacker.stats.hp}/{attacker.stats.max_hp} HP)")
         entry.add_item(f"defender: {defender.name} ({defender.stats.hp}/{defender.stats.max_hp} HP)")
 
-        modified_attack_dice = attacker.stats.attack
-        if attacker.equipment.weapon and attacker.equipment.weapon.equipppable and attacker.equipment.weapon.equipppable.modified_attack:
-            modified_attack_dice = attacker.equipment.weapon.equipppable.modified_attack
-            entry.add_item(f"attacker_weapon: {attacker.equipment.weapon.name}; modified_attack: {attacker.equipment.weapon.equipppable.modified_attack}")
-        else:
-            entry.add_item(f"attacker_weapon: none; base_attack: {modified_attack_dice}")
+        attacker_stats = attacker.get_modified_stats()
+        defender_stats = defender.get_modified_stats()
 
-        modified_defense = defender.stats.defense
-        if defender.equipment.chest and defender.equipment.chest.equipppable and defender.equipment.chest.equipppable.modified_defense:
-            modified_defense = defender.equipment.chest.equipppable.modified_defense
-            entry.add_item(f"defender_chest_piece: {defender.equipment.chest.name}; modified_defense: {defender.equipment.chest.equipppable.modified_defense}")
-        else:
-            entry.add_item(f"defender_chest_piece: none; base_defense: {modified_defense}")
+        attacker_weapon = attacker.equipment.weapon.name if attacker.equipment.weapon else "none"
+        entry.add_item(f"attacker_weapon: {attacker_weapon}")
 
-        attack_roll = modified_attack_dice.roll()
+        defender_chest_piece = defender.equipment.chest.name if defender.equipment.chest else "none"
+        entry.add_item(f"defender_chest_piece: {defender_chest_piece}")
 
-        entry.add_item(f"attack_roll: {modified_attack_dice} -> {attack_roll}")
-        entry.add_item(f"defense: {modified_defense}")
+        attack_roll = attacker_stats.attack.roll()
 
-        damage = min(max(attack_roll - modified_defense, 0), defender.stats.hp)
+        entry.add_item(f"attack_roll: {attacker_stats.attack} -> {attack_roll}")
+        entry.add_item(f"defense: {defender_stats.defense}")
+
+        damage = min(max(attack_roll - defender_stats.defense, 0), defender.stats.hp)
         entry.add_item(f"damage: {damage}")
         defender.stats.hp -= damage
         if defender.stats.hp <= 0:

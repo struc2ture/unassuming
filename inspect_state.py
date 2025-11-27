@@ -8,7 +8,7 @@ import tcod
 from tcod.context import Context
 from tcod.event import Event
 
-from entity import Actor, Entity
+from entity import Actor, Entity, Item, EquipSlot
 from game_state import GameState
 from game_logic import GameLogic
 
@@ -49,8 +49,8 @@ class InspectState(GameState):
         self.this_console.print(
             cursor_x,
             cursor_y,
-            text=name_str,
-            fg=(255, 255, 255))
+            text=name_str
+        )
         
         self.this_console.print(
             cursor_x + len(name_str),
@@ -62,34 +62,63 @@ class InspectState(GameState):
         cursor_y += 2
 
         if isinstance(self.inspected_entity, Actor) and self.inspected_entity.is_alive:
+            stats = self.inspected_entity.get_modified_stats()
             self.this_console.print(
                 cursor_x,
                 cursor_y,
-                text=f"HP: {self.inspected_entity.stats.hp}/{self.inspected_entity.stats.max_hp}",
-                fg=(255, 255, 255)
+                text=f"HP: {stats.hp}/{stats.max_hp}"
             )
             cursor_y += 1
             self.this_console.print(
                 cursor_x,
                 cursor_y,
-                text=f"Attack: {str(self.inspected_entity.stats.attack)}",
-                fg=(255, 255, 255)
+                text=f"Attack: {str(stats.attack)}"
             )
             cursor_y += 1
             self.this_console.print(
                 cursor_x,
                 cursor_y,
-                text=f"Defense: {self.inspected_entity.stats.defense}",
-                fg=(255, 255, 255)
+                text=f"Defense: {stats.defense}"
             )
             cursor_y += 2
+        elif isinstance(self.inspected_entity, Item):
+            if self.inspected_entity.equipppable:
+                e = self.inspected_entity.equipppable
+                self.this_console.print(
+                    cursor_x,
+                    cursor_y,
+                    text=f"Equipment: {e.equip_slot}"
+                )
+                cursor_y += 1
+                match e.equip_slot:
+                    case EquipSlot.WEAPON:
+                        self.this_console.print(
+                            cursor_x,
+                            cursor_y,
+                            text=f"Attack: {e.modified_attack}"
+                        )
+                        cursor_y += 1
+                    case EquipSlot.CHEST | EquipSlot.LEGS | EquipSlot.ARMS:
+                        self.this_console.print(
+                            cursor_x,
+                            cursor_y,
+                            text=f"Defense: {e.modified_defense}"
+                        )
+                        cursor_y += 1
+            else:
+                self.this_console.print(
+                    cursor_x,
+                    cursor_y,
+                    text="Just an item"
+                )
+                cursor_y += 1
+            cursor_y += 1
 
         self.this_console.print(
             cursor_x,
             cursor_y,
-            text="Description:",
-            fg=(255, 255, 255))
-        
+            text="Description:"
+        )
         cursor_y += 2
         
         for line in self.inspected_entity.description.splitlines():
@@ -97,8 +126,7 @@ class InspectState(GameState):
                 self.this_console.print(
                     cursor_x,
                     cursor_y,
-                    text=wrapped_line,
-                    fg=(255, 255, 255)
+                    text=wrapped_line
                 )
                 cursor_y += 1
             cursor_y += 1

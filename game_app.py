@@ -33,6 +33,8 @@ class GameApp:
         GameTrace.add_game_start()
         GameTrace.add_tick(self.game_turn)
 
+        self.game_logic.tile_map.DEBUG_toggle_ignore_fov()
+
 
     def handle_event(self, context: tcod.context.Context, event: tcod.event.Event) -> None:
         context.convert_event(event)  # Adds tile coordinates to mouse events.
@@ -50,13 +52,15 @@ class GameApp:
             return
 
         match event:
-            case tcod.event.KeyDown(sym=tcod.event.KeySym.L):
+            case tcod.event.KeyDown(sym=tcod.event.KeySym.F1):
                 if event.mod & tcod.event.Modifier.SHIFT:
                     dump_game_trace_to_file()
                 else:
                     print()
                     GameTrace.log.print_last(5)
                     print()
+            case tcod.event.KeyDown(sym=tcod.event.KeySym.F2):
+                self.game_logic.tile_map.DEBUG_toggle_ignore_fov()
             case tcod.event.MouseButtonDown(button=tcod.event.MouseButton.LEFT, tile=tile):
                 entity = self.game_logic.get_entities_at(int(tile.x), int(tile.y))
                 if entity:
