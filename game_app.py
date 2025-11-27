@@ -13,6 +13,7 @@ from game_state import GameState
 from inspect_state import InspectState
 from inventory_state import InventoryState
 from dialog_state import DialogState
+from in_game_log import InGameLog
 
 class GameApp:
     game_turn: int
@@ -20,6 +21,7 @@ class GameApp:
     actor_controller: ActorController
     state_stack: list[GameState]
     main_console: tcod.console.Console
+    DEBUG_disable_in_game_log: bool
 
     def __init__(self, map_width: int, map_height: int, main_console: tcod.console.Console):
         self.main_console = main_console
@@ -30,11 +32,14 @@ class GameApp:
 
         self.actor_controller = ActorController(self.game_logic)
 
+        InGameLog.add_message("I hope you like it here! :)")
+        InGameLog.add_message("I sure don't.")
+
         GameTrace.add_game_start()
         GameTrace.add_tick(self.game_turn)
 
         self.game_logic.tile_map.DEBUG_toggle_ignore_fov()
-
+        self.DEBUG_disable_in_game_log = False
 
     def handle_event(self, context: tcod.context.Context, event: tcod.event.Event) -> None:
         context.convert_event(event)  # Adds tile coordinates to mouse events.
@@ -61,6 +66,8 @@ class GameApp:
                     print()
             case tcod.event.KeyDown(sym=tcod.event.KeySym.F2):
                 self.game_logic.tile_map.DEBUG_toggle_ignore_fov()
+            case tcod.event.KeyDown(sym=tcod.event.KeySym.F3):
+                self.DEBUG_disable_in_game_log = not self.DEBUG_disable_in_game_log
             case tcod.event.MouseButtonDown(button=tcod.event.MouseButton.LEFT, tile=tile):
                 entity = self.game_logic.get_entities_at(int(tile.x), int(tile.y))
                 if entity:
@@ -102,7 +109,6 @@ class GameApp:
 
                 case tcod.event.KeyDown(sym=tcod.event.KeySym.G):
                     self.game_logic.pickup_item_below(self.game_logic.player)
-                    print(", ".join(item.name for item in self.game_logic.player.inventory))
                     player_passed_turn = True
 
                 case tcod.event.KeyDown(sym=tcod.event.KeySym.V):
@@ -135,14 +141,38 @@ class GameApp:
     def push_state(self, state: GameState):
         self.state_stack.append(state)
 
+    # TODO(A): Shouldn't be here
+    def draw_in_game_log(self, console: tcod.console.Console) -> None:
+        console.draw_frame(
+            0,
+            console.height - 5,
+            console.width,
+            5,
+            decoration="         ",
+            bg=(0, 0, 0)
+        )
+        cursor_x = 0
+        cursor_y = console.height - 5
+        for message in InGameLog.log.messages[-5:]:
+            console.print(
+                cursor_x,
+                cursor_y,
+                text=message,
+            )
+            cursor_y += 1
+
     def draw(self, console: tcod.console.Console) -> None:
         self.game_logic.tile_map.draw(console)
+
         sorted_entities = sorted(
             self.game_logic.entities, key=lambda x: x.render_layer.value
         )
         for entity in sorted_entities:
             if self.game_logic.tile_map.pos_visible(*entity.pos):
                 entity.draw(console)
+
+        if not self.DEBUG_disable_in_game_log:
+            self.draw_in_game_log(console)
 
         for state in self.state_stack:
             state.render(console)

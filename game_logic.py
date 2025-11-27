@@ -7,6 +7,7 @@ from tile_map import TileMap
 from game_trace import GameTrace
 from game_effect import GameEffect, StartDialogGameEffect
 from entity import Actor, Entity, Item
+from in_game_log import InGameLog
 import proc_gen
 import templates
 
@@ -61,8 +62,10 @@ class GameLogic:
 
     def attack(self, attacker: Actor, defender: Actor) -> None:
         entry = GameTrace.log.add_entry("ATTACK")
-        entry.add_item(f"attacker: {attacker.name} ({attacker.stats.hp}/{attacker.stats.max_hp} HP)")
-        entry.add_item(f"defender: {defender.name} ({defender.stats.hp}/{defender.stats.max_hp} HP)")
+        attacker_name = attacker.name
+        defender_name = defender.name
+        entry.add_item(f"attacker: {attacker_name} ({attacker.stats.hp}/{attacker.stats.max_hp} HP)")
+        entry.add_item(f"defender: {defender_name} ({defender.stats.hp}/{defender.stats.max_hp} HP)")
 
         attacker_stats = attacker.get_modified_stats()
         defender_stats = defender.get_modified_stats()
@@ -85,10 +88,10 @@ class GameLogic:
             defender.die()
             entry.add_item(f"defender_died: true")
 
-        log_line = f'{attacker.name} swings at {defender.name}, '
+        log_line = f'{attacker_name} swings at {defender_name}, '
         log_line += f'and deals {damage} damage' if damage > 0 else 'but misses'
         log_line += '.' if defender.is_alive else ', killing them.'
-        print(log_line)
+        InGameLog.add_message(log_line)
 
     def bump(self, entity: Entity, bumped_entity: Entity) -> List[GameEffect]:
         if isinstance(entity, Actor) and isinstance(bumped_entity, Actor):
@@ -106,11 +109,15 @@ class GameLogic:
         for entity in self.get_entities_at(actor.x, actor.y):
             if isinstance(entity, Item):
                 actor.pickup_item(entity)
+                InGameLog.add_message(f"{actor.name} picks up {entity.name}")
                 return
             
     def drop_item(self, actor: Actor) -> None:
         if actor.inventory:
-            actor.drop_item(actor.inventory[0])
+            item = actor.inventory[0]
+            actor.drop_item(item)
+            InGameLog.add_message(f"{actor.name} drops {item.name}")
+
 
     def turn_actor_hostile(self, actor: Actor) -> None:
         actor.is_hostile = True
