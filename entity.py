@@ -169,22 +169,27 @@ class Actor(Entity):
         self.inventory.remove(item)
         item.set_in_world(self.x, self.y)
 
-    def equip_item(self, item: Item) -> None:
+    def equip_item(self, item: Item, only_if_free_slot: bool = False) -> bool:
+        equipped = False
         if item.equipppable:
-            # unequipped_item = None
             match item.equipppable.equip_slot:
                 case EquipSlot.WEAPON:
-                    # unequipped_item = self.equipment.weapon
-                    self.equipment.weapon = item
+                    if not only_if_free_slot or not self.equipment.weapon:
+                        self.equipment.weapon = item
+                        equipped = True
                 case EquipSlot.CHEST:
-                    # unequipped_item = self.equipment.chest
-                    self.equipment.chest = item
+                    if not only_if_free_slot or not self.equipment.chest:
+                        self.equipment.chest = item
+                        equipped = True
                 case EquipSlot.LEGS:
-                    # unequipped_item = self.equipment.legs
-                    self.equipment.legs = item
+                    if not only_if_free_slot or not self.equipment.legs:
+                        self.equipment.legs = item
+                        equipped = True
                 case EquipSlot.ARMS:
-                    # unequipped_item = self.equipment.arms
-                    self.equipment.arms = item
+                    if not only_if_free_slot or not self.equipment.arms:
+                        self.equipment.arms = item
+                        equipped = True
+        return equipped
 
     def is_item_equppied(self, item: Item) -> bool:
         if item.equipppable: 

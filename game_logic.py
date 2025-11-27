@@ -6,7 +6,7 @@ import tcod
 from tile_map import TileMap
 from game_trace import GameTrace
 from game_effect import GameEffect, StartDialogGameEffect
-from entity import Actor, Entity, Item
+from entity import Actor, Entity, Item, EquipSlot
 from in_game_log import InGameLog
 import proc_gen
 import templates
@@ -108,10 +108,15 @@ class GameLogic:
     def pickup_item_below(self, actor: Actor) -> None:
         for entity in self.get_entities_at(actor.x, actor.y):
             if isinstance(entity, Item):
-                actor.pickup_item(entity)
-                InGameLog.add_message(f"{actor.name} picks up {entity.name}")
-                return
-            
+                item = entity
+                actor.pickup_item(item)
+                equipped = False
+                if item.equipppable:
+                    equipped = actor.equip_item(item, only_if_free_slot=True)
+
+                equipped_str = " and equips it." if equipped else "."
+                InGameLog.add_message(f"{actor.name} picks up {item.name}{equipped_str}")
+
     def drop_item(self, actor: Actor) -> None:
         if actor.inventory:
             item = actor.inventory[0]
