@@ -1,3 +1,4 @@
+import random
 from typing import List, Tuple, Optional
 
 import numpy as np
@@ -141,6 +142,8 @@ class GameLogic:
                 return self.bump(entity, bumped_entity)
             else:
                 self.move(entity, new_x, new_y)
+                if random.random() > 0.9:
+                    AudioEngineGlobal.engine.play_sfx_random(AudioEngineGlobal.engine.FOOTSTEPS)
         self.update_fov()
         return []
 

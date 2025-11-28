@@ -5,6 +5,7 @@ import os
 import tcod
 
 from actor_controller import ActorController
+from audio_engine import AudioEngineGlobal
 from dialog_state import DialogState
 from entity import Actor
 from game_effect import *
@@ -41,6 +42,8 @@ class GameApp:
 
         # self.game_logic.tile_map.DEBUG_toggle_ignore_fov()
         self.hud = Hud(0, self.main_console.height - 6, self.main_console.width, 6, self.game_logic)
+
+        AudioEngineGlobal.engine.play_background(AudioEngineGlobal.engine.BACKGROUND)
 
     def handle_event(self, context: tcod.context.Context, event: tcod.event.Event) -> None:
         context.convert_event(event)  # Adds tile coordinates to mouse events.
