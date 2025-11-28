@@ -3,6 +3,7 @@ from typing import List, Tuple, Optional
 import numpy as np
 import tcod
 
+from audio_engine import AudioEngineGlobal
 from tile_map import TileMap
 from game_trace import GameTrace
 from game_effect import GameEffect, StartDialogGameEffect
@@ -86,6 +87,10 @@ class GameLogic:
         defender.stats.hp -= damage
         if defender.stats.hp <= 0:
             defender.die()
+            if defender.copy_source and defender.copy_source.name == "Crane":
+                AudioEngineGlobal.engine.play_sfx(AudioEngineGlobal.engine.CRANE_DEATH)
+            elif defender.copy_source and defender.copy_source.name == "Player":
+                AudioEngineGlobal.engine.play_sfx(AudioEngineGlobal.engine.PLAYER_DEATH)
             entry.add_item(f"defender_died: true")
 
         log_line = f'{attacker_name} swings at {defender_name}, '

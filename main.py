@@ -1,9 +1,11 @@
+import time
 import traceback
 
+import soundfile
 import tcod
+import tcod.sdl.audio
 
 from game_app import GameApp
-
 
 def main() -> None:
     tileset = tcod.tileset.load_tilesheet(
