@@ -22,19 +22,21 @@ class GameLogic:
         self.player = templates.PLAYER.spawn(0, 0)
         self.entities = [self.player]
 
-        map_spec = proc_gen.MapSpec(
-            max_rooms=30,
-            room_min_size=6,
-            room_max_size=10,
-            map_width=map_width,
-            map_height=map_height,
-            max_monsters_per_room=2
-        )
-        self.tile_map = proc_gen.generate_map(
-            map_spec,
-            player=self.player,
-            entities=self.entities
-        )
+        # map_spec = proc_gen.MapSpec(
+        #     max_rooms=30,
+        #     room_min_size=6,
+        #     room_max_size=10,
+        #     map_width=map_width,
+        #     map_height=map_height,
+        #     max_monsters_per_room=2
+        # )
+        # self.tile_map = proc_gen.generate_map(
+        #     map_spec,
+        #     player=self.player,
+        #     entities=self.entities
+        # )
+
+        self.tile_map = proc_gen.generate_hardcoded(map_width, map_height, self.player, self.entities)
 
         self.update_fov()
 

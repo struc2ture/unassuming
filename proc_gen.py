@@ -137,11 +137,37 @@ def generate_map(
         if len(rooms) > 0: # skip the first room
             for x, y in tunnel_between(rooms[-1].center, new_room.center):
                 map.tiles[x, y] = tile_types.floor
-            if len(rooms) > 2: # the first three rooms are for testing
-                place_hostile = random.randint(0, 1) == 0
-                place_room_entities(new_room, entities, spec.max_monsters_per_room, place_hostile)
+            place_hostile = random.randint(0, 1) == 0
+            place_room_entities(new_room, entities, spec.max_monsters_per_room, place_hostile)
 
         rooms.append(new_room)
+
+    player.set_pos(*rooms[0].center)
+
+    return map
+
+def generate_hardcoded(
+    map_width: int,
+    map_height: int,
+    player: Entity,
+    entities: List[Entity]
+) -> TileMap:
+    map = TileMap(map_width, map_height)
+
+    rooms: List[RectangularRoom] = []
+
+    rooms.append(RectangularRoom(3, 3, 7, 7))
+    rooms.append(RectangularRoom(15, 4, 8, 8))
+    rooms.append(RectangularRoom(15, 15, 10, 10))
+
+    for room in rooms:
+        map.tiles[room.inner] = tile_types.floor
+
+    index = 1
+    for room in rooms[1:]:
+        for x, y in tunnel_between(rooms[index - 1].center, room.center):
+            map.tiles[x, y] = tile_types.floor
+        index += 1
 
     player.set_pos(*rooms[0].center)
 

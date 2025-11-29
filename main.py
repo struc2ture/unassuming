@@ -12,7 +12,7 @@ def main() -> None:
         "Taffer_20x20.png", 16, 16, tcod.tileset.CHARMAP_CP437
     )
     tcod.tileset.procedural_block_elements(tileset=tileset)
-    console = tcod.console.Console(80, 50, order="F")
+    console = tcod.console.Console(80, 56, order="F")
 
     game_app = GameApp(80, 50, console)
 
