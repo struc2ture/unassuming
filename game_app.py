@@ -4,18 +4,22 @@ import os
 
 import tcod
 
+from ability import *
 from actor_controller import ActorController
 from audio_engine import AudioEngineGlobal
-from dialog_state import DialogState
 from entity import Actor
 from game_effect import *
+from game_intent import *
 from game_logic import GameLogic
 from game_trace import GameTrace
 from game_state import GameState
 from hud import Hud
+from in_game_log import InGameLog
+
+from dialog_state import DialogState
 from inspect_state import InspectState
 from inventory_state import InventoryState
-from in_game_log import InGameLog
+from pick_target_state import PickTargetState
 
 class GameApp:
     game_turn: int
@@ -118,6 +122,13 @@ class GameApp:
                 case tcod.event.KeyDown(sym=tcod.event.KeySym.V):
                     self.game_logic.drop_item(self.game_logic.player)
                     player_passed_turn = True
+
+                case tcod.event.KeyDown(sym=tcod.event.KeySym.N1):
+                    effects = self.game_logic.process_intent(UseAbilityGameIntent(ability=LightningAbility(power=Dice.from_expr("1d10"))))
+                    for effect in effects:
+                        match effect:
+                            case PickTargetGameEffect(for_intent=for_intent):
+                                self.push_state(PickTargetState(self.game_logic, self, self.main_console, for_intent))
 
                 case tcod.event.KeyDown(sym=tcod.event.KeySym.I):
                     self.push_state(InventoryState(self.game_logic, self, self.main_console, self.game_logic.player))

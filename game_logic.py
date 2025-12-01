@@ -6,8 +6,9 @@ import tcod
 
 from audio_engine import AudioEngineGlobal
 from tile_map import TileMap
+from game_effect import *
+from game_intent import *
 from game_trace import GameTrace
-from game_effect import GameEffect, StartDialogGameEffect
 from entity import Actor, Entity, Item, EquipSlot
 from in_game_log import InGameLog
 import proc_gen
@@ -168,6 +169,16 @@ class GameLogic:
         actor_b.inventory.append(item_a)
         item_a.set_in_inventory(actor_b)
         item_b.set_in_inventory(actor_a)
+
+    def process_intent(self, intent: GameIntent) -> List[GameEffect]:
+        match intent:
+            case UseAbilityGameIntent(ability=ability, target=target):
+                if target is None:
+                    return [PickTargetGameEffect(intent)]
+                else:
+                    print(f"{ability.name} on ({target[0]}, {target[1]})")
+                    return []
+        return []
 
     def get_path_to(self, entity: Entity, dest_x: int, dest_y: int) -> List[Tuple[int, int]]:
         cost = np.array(self.tile_map.tiles["walkable"], dtype=np.int8)
