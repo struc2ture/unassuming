@@ -178,6 +178,7 @@ def generate_hardcoded(
     entities.append(templates.LEATHER_ARMOR.spawn(rooms[0].center[0] - 2, rooms[0].center[1]))
     entities.append(templates.A_TRINKET.spawn(rooms[0].center[0] + 1, rooms[0].center[1]))
     entities.append(templates.A_MAP.spawn(rooms[0].center[0] + 2, rooms[0].center[1]))
+    # entities.append(templates.A_NOTEBOOK.spawn(rooms[0].center[0] + 3, rooms[0].center[1]))
 
     entities.append(templates.CRANE.spawn(rooms[1].center[0], rooms[1].center[1]))
     entities.append(templates.BULB.spawn(rooms[2].center[0], rooms[2 ].center[1]))

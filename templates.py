@@ -64,6 +64,19 @@ LEATHER_ARMOR = Item.item_template(
     equippable=ItemEquippable(EquipSlot.CHEST, modified_defense=3),
 )
 
+A_NOTEBOOK = Item.item_template(
+    glyph="§",
+    color=(139, 139, 60),
+    name="A Notebook",
+    description=textwrap.dedent("""\
+        A grimy notebook bound with tough yarn; its thick leather plates enclosing rough cuts of parchment stained in yellow, blue and red.
+        A tiny nub of charcoal wrapped in cloth is tucked between the pages.
+        The notebook seems empty at first, but if you squint you notice the faint outline of someone's manic scribbling.
+        Look long enough, and you can make out any phrase lingering in your mind appear in the ghost of the writing.
+        Shall you put the charcoal of your mind to the parchment of the notebook and make those phrases stick?
+        """)
+)
+
 ### ACTORS: PLAYER ###
 
 PLAYER = Actor.actor_template(
@@ -135,8 +148,8 @@ class USHER_DIALOG:
 
 USHER = Actor.actor_template(
     glyph="U",
-    color=(50, 80, 50),
-    name="Usher",
+    color=(100, 150, 100),
+    name="Klealmn",
     description=textwrap.dedent("""\
         This man looks suspiciously friendly for the kind of place you both find yourself in.
         As soon as he notices you, he makes eye contact and puts on a polite smile.
@@ -148,7 +161,7 @@ USHER = Actor.actor_template(
     # TODO(A): I should really double check this type of logic.
     #          But I think it should work: when the parent entity (the NPC) gets spawned,
     #          it's deep copied from the template, which should include a deep copy of each item in the inventory.
-    inventory=[A_MAP]
+    inventory=[A_NOTEBOOK]
 )
 
 A_MEEK_MAN = Actor.actor_template(
